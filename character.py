@@ -6,7 +6,7 @@ from config import *
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, game, x, y, bool_fly):
 
         self.game = game
         self._layer = PLAYER_BODY_LAYER
@@ -17,6 +17,7 @@ class Player(pygame.sprite.Sprite):
 
         self.x = TILESIZE * x
         self.y = TILESIZE * y
+        self. fly = bool_fly
 
         self.width = TILESIZE
         self.height = TILESIZE
@@ -84,18 +85,41 @@ class Player(pygame.sprite.Sprite):
             self.shoot_cooldown -= 1
 
         self.rect.x += self.x_change
-        self.collide_blocks('x')
-        self.collide_holes('x')
+        self.collide_walls('x')
+        self.collide_blocks('x', self.fly)
+        self.collide_holes('x', self.fly)
 
         self.rect.y += self.y_change
-        self.collide_blocks('y')
-        self.collide_holes('y')
+        self.collide_walls('y')
+        self.collide_blocks('y', self.fly)
+        self.collide_holes('y', self.fly)
 
         self.x_change = 0
         self.y_change = 0
 
-    def collide_blocks(self, direction):
+    def collide_walls(self, direction):
         if direction == "x":
+            hits_wall = pygame.sprite.spritecollide(
+                self, self.game.walls, False)
+
+            if hits_wall:
+                if self.x_change > 0:
+                    self.rect.x = hits_wall[0].rect.left - self.rect.width
+                if self.x_change < 0:
+                    self.rect.x = hits_wall[0].rect.right
+
+        if direction == "y":
+            hits_wall = pygame.sprite.spritecollide(
+                self, self.game.walls, False)
+
+            if hits_wall:
+                if self.y_change > 0:
+                    self.rect.y = hits_wall[0].rect.top - self.rect.height
+                if self.y_change < 0:
+                    self.rect.y = hits_wall[0].rect.bottom
+
+    def collide_blocks(self, direction, fly):
+        if direction == "x" and not fly:
             hits_block = pygame.sprite.spritecollide(
                 self, self.game.blocks, False)
 
@@ -105,7 +129,7 @@ class Player(pygame.sprite.Sprite):
                 if self.x_change < 0:
                     self.rect.x = hits_block[0].rect.right
 
-        if direction == "y":
+        if direction == "y" and not fly:
             hits_block = pygame.sprite.spritecollide(
                 self, self.game.blocks, False)
 
@@ -115,8 +139,8 @@ class Player(pygame.sprite.Sprite):
                 if self.y_change < 0:
                     self.rect.y = hits_block[0].rect.bottom
 
-    def collide_holes(self, direction):
-        if direction == "x":
+    def collide_holes(self, direction, fly):
+        if direction == "x" and not fly:
             hits_hole = pygame.sprite.spritecollide(
                 self, self.game.holes, False)
 
@@ -126,7 +150,7 @@ class Player(pygame.sprite.Sprite):
                 if self.x_change < 0:
                     self.rect.x = hits_hole[0].rect.right
 
-        if direction == "y":
+        if direction == "y" and not fly:
             hits_hole = pygame.sprite.spritecollide(
                 self, self.game.holes, False)
 

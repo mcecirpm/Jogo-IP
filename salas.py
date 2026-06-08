@@ -46,7 +46,7 @@ class Wall(pygame.sprite.Sprite):
 
         self.game = game
         self._layer = WALLS_LAYER
-        self.group = self.game.all_sprites, self.game.blocks
+        self.group = self.game.all_sprites, self.game.walls
 
         pygame.sprite.Sprite.__init__(self, self.group)
 
@@ -59,6 +59,30 @@ class Wall(pygame.sprite.Sprite):
         self.image = pygame.Surface([self.width, self.height])
         # Marrom em RGB
         self.image.fill((150, 75, 00))
+
+        self.rect = self.image.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
+
+
+class Block(pygame.sprite.Sprite):
+    def __init__(self, game, x, y):
+
+        self.game = game
+        self._layer = ROCK_LAYER
+        self.group = self.game.all_sprites, self.game.blocks
+
+        pygame.sprite.Sprite.__init__(self, self.group)
+
+        self.x = x * TILESIZE
+        self.y = y * TILESIZE
+
+        self.width = TILESIZE
+        self.height = TILESIZE
+
+        self.image = pygame.Surface([self.width, self.height])
+        # Marrom em RGB
+        self.image.fill((146, 142, 133))
 
         self.rect = self.image.get_rect()
         self.rect.x = self.x

@@ -26,14 +26,11 @@ class Game:
                 if column == "W":
                     Wall(self, value, pos)
                 if column == "P":
-                    self.player = Player(self, value, pos)
+                    self.player = Player(self, value, pos, True)
                 if column == "H":
                     Hole(self, value, pos)
-
-        for pos, row in enumerate(map):
-            for value, column in enumerate(row):
-                if value == rand_pos_x and pos == rand_pos_y:
-                    Inimigo_pausado(self, value, pos, True, False, 3.0)
+                if column == "B":
+                    Block(self, value, pos)
 
     def new(self):
         # Quando começa um novo jogo
@@ -41,6 +38,7 @@ class Game:
 
         self.all_sprites = pygame.sprite.LayeredUpdates()
 
+        self.walls = pygame.sprite.LayeredUpdates()
         self.blocks = pygame.sprite.LayeredUpdates()
         self.holes = pygame.sprite.LayeredUpdates()
 
