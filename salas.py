@@ -6,21 +6,28 @@ from config import *
 
 
 class RoomType(Enum):
-    PADRAO = (17, 11)
-    GRANDE = (34, 22)
-    L_SHAPE = (34, 12)
-    CURTO_H = (9, 11)
-    CURTO_V = (11, 9)
-    LONGO_H = (9, 22)
-    LONGO_V = (22, 9)
-    I_SHAPE_H = (34, 9)
-    I_SHAPE_V = (9, 34)
+    PADRAO = (21, 15)
+    GRANDE = (43, 31)
+    L_SHAPE = (43, 31)
+    CURTO_H = (9, 15)
+    CURTO_V = (21, 9)
+    LONGO_H = (9, 31)
+    LONGO_V = (43, 9)
+    I_SHAPE_H = (43, 9)
+    I_SHAPE_V = (9, 43)
 
 
-class TreasureRoomType(Enum):
-    T_PADRAO = (17, 11)
-    T_CURTO_H = (9, 11)
-    T_CURTO_V = (11, 9)
+class SpecialRoomType(Enum):
+    T_PADRAO = (21, 15)
+    T_CURTO_H = (9, 15)
+    T_CURTO_V = (21, 9)
+
+    SH_PADRAO = (21, 15)
+
+    SE_PADRAO = (21, 15)
+    B_PADRAO = (21, 15)
+    B_LONGO_H = (9, 31)
+    B_LONGO_V = (43, 9)
 
 
 class Labirinto:
