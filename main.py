@@ -6,6 +6,7 @@ from classes.config import *
 from classes.salas import *
 from classes.character import *
 from classes.enemies import *
+from classes.collectibles import *
 
 
 class Game:
@@ -28,6 +29,10 @@ class Game:
                     Hole(self, value, pos)
                 if column == "B":
                     Block(self, value, pos)
+
+        for _ in range(5):
+            Inimigo_pausado(self, random.randint(32, WIDTH_TELA - 52),
+                            random.randint(32, HEIGTH_TELA - 48), False, True, 3)
 
     def new(self):
         # Quando começa um novo jogo

@@ -3,7 +3,7 @@ import random
 import math
 import json
 
-from class.config import *
+from classes.config import *
 
 
 class Inimigo_pausado(pygame.sprite.Sprite):
@@ -35,31 +35,19 @@ class Inimigo_pausado(pygame.sprite.Sprite):
         self.rect.x = self.x
         self.rect.y = self.y
 
-    def moviment(self):
-        random_mov_x = random.randint(0, 3)
-        random_mov_y = random.randint(0, 3)
-
-        if random_mov_x == 0:
-            self.x_change -= SPEED_INIMIGO
-        elif random_mov_x == 1:
-            self.x_change += SPEED_INIMIGO
-        else:
-            self.x_change = 0
-
-        if random_mov_y == 0:
-            self.y_change -= SPEED_INIMIGO
-        elif random_mov_y == 1:
-            self.y_change += SPEED_INIMIGO
-        else:
-            self.y_change = 0
+        self.pos = pygame.math.Vector2(self.rect.center)
 
     def uptade(self):
-        self.moviment()
+        pos_inimigo = pygame.math.Vector2(self.rect.center)
+        pos_player = pygame.math.Vector2(self.game.player.rect.center)
 
-        self.rect.x += self.x_change
-        self.collide_walls('x')
-        self.rect.y += self.y_change
-        self.collide_walls('y')
+        direction = pos_player - pos_inimigo
+
+        if direction.length() > 0:
+            direction = direction.normalize()
+
+        self.pos += direction * SPEED_INIMIGO
+        self.rect.center = self.pos
 
     def collide_walls(self, direction):
         if direction == "x":

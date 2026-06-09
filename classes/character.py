@@ -2,7 +2,7 @@ import pygame
 import math
 import json
 
-from class.config import *
+from classes.config import *
 
 
 class Player(pygame.sprite.Sprite):
