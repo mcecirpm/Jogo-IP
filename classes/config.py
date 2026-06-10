@@ -11,8 +11,8 @@ WALLS_LAYER = 3
 ROCK_LAYER = 3
 HOLE_LAYER = 2
 
-DOOR_CLOSED_LAYER = 6
-DOOR_OPEN_LAYER = 5
+DOOR_CLOSED_LAYER = 4
+DOOR_OPEN_LAYER = 3
 
 DETAILS_LAYER = 1
 GROUND_LAYER = 0
@@ -28,8 +28,8 @@ SPEED_INIMIGO = 3
 RANGE_PROJ = 10.0
 FREQ_PROJ = 16
 
-SPEED = 5
-SPEED_PROJ = 4
+SPEED = 4
+SPEED_PROJ = 7
 DMG_BASE = 3.5
 HP_BASE = 0
 
@@ -50,7 +50,7 @@ tilemap = [
     'W...................W',
     'W...................W',
     'W...................W',
-    'W.........D........PW',
+    'W.........P.........W',
     'W...................W',
     'W...................W',
     'W...................W',

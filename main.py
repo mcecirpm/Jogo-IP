@@ -12,28 +12,46 @@ from classes.collectibles import *
 class Game:
     def __init__(self):
         pygame.init()
-        pygame.font.init()
-        self.font = pygame.font.SysFont('Arial', 14, True)
-
         self.screen = pygame.display.set_mode((WIDTH_TELA, HEIGTH_TELA))
         self.clock = pygame.time.Clock()
         self.runnning = True
 
-    def createRoom(self):
+    def createRoom(self, layout):
         # Primeiro para pegar a string que compõe o mapa
-        for pos, row in enumerate(tilemap):
+        for pos, row in enumerate(layout):
             # Segundo para pegar os caracteres da string
             for value, column in enumerate(row):
                 if column == "W":
                     Wall(self, value, pos)
-                if column == "P":
-                    self.player = Player(self, value, pos, True)
-                if column == "H":
+                elif column == "P":
+                    if not hasattr(self, 'player') or self.player is None:
+                        self.player = Player(self, value, pos, True)
+                    else:
+                        self.player.rect.x = value * TILESIZE
+                        self.player.rect.y = pos * TILESIZE
+                elif column == "H":
                     Hole(self, value, pos)
-                if column == "B":
+                elif column == "B":
                     Block(self, value, pos)
-                if column == "D":
-                    Dummy(self, value, pos)
+                elif column in ['N', 'S', 'E', 'O']:
+                    Door_Open(self, value, pos)
+
+    def troca_sala(self, novo_layout):
+        # Função para trocar a sala, destruindo os sprites atuais e criando novos com base no layout fornecido
+        # Limpar as paredes, blocos, buracos atuais e portas abertas
+        for sprite in self.walls:
+            sprite.kill()
+        for sprite in self.blocks:
+            sprite.kill()
+        for sprite in self.holes:
+            sprite.kill()
+        for sprite in self.door_open:
+            sprite.kill()
+
+        # Atualiza a sala atual
+        self.current_room = novo_layout
+        # Carrega o novo layout
+        self.createRoom(self.current_room.layout)
 
     def new(self):
         # Quando começa um novo jogo
@@ -47,15 +65,22 @@ class Game:
         self.blocks = pygame.sprite.LayeredUpdates()
         self.holes = pygame.sprite.LayeredUpdates()
 
+        self.doors_open = pygame.sprite.LayeredUpdates()
+        self.doors_closed = pygame.sprite.LayeredUpdates()
+
         self.projectiles = pygame.sprite.LayeredUpdates()
 
         self.enemies = pygame.sprite.LayeredUpdates()
         self.pickup = pygame.sprite.LayeredUpdates()
 
         self.player = None
-        self.inimigo = False
 
-        self.createRoom()
+        # Define quantas salas quer no andar
+        gerador = MapGenerator(num_rooms=8)
+        self.map, self.current_room = gerador.generate()
+
+        # Carrega a sala inicial (Start Room)
+        self.createRoom(self.current_room.layout)
 
     def events(self):
         # Game loop event

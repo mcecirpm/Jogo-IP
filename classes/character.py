@@ -1,5 +1,4 @@
 import pygame
-import math
 import json
 
 from classes.config import *
@@ -236,8 +235,15 @@ class Projectile(pygame.sprite.Sprite):
         if pygame.sprite.spritecollide(self, self.game.walls, False):
             self.kill()
 
+        if pygame.sprite.spritecollide(self, self.game.doors_open, False):
+            self.kill()
+
+        if pygame.sprite.spritecollide(self, self.game.doors_closed, False):
+            self.kill()
+
         hits_enemy = pygame.sprite.spritecollide(
             self, self.game.enemies, False)
+
         for hit in hits_enemy:
             if self.rect.colliderect(hit.hitbox):
                 hit.take_damage(self.damage)
