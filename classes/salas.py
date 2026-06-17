@@ -156,6 +156,11 @@ class MapGenerator:
                 sala.tipo = 'chefe'
                 salas_chefe.append(sala)
 
+                linha = list(sala.layout[7])
+                linha[10] = 'T'
+
+                sala.layout[7] = "".join(linha)
+
             if len(salas_chefe) >= 3:
                 break
 
@@ -273,6 +278,7 @@ class Minimap:
 class Pedestal(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
         self.game = game
+        self.has_item = True
 
         self._layer = DETAILS_LAYER
         self.groups = (self.game.all_sprites, self.game.pedestal)
@@ -290,6 +296,9 @@ class Pedestal(pygame.sprite.Sprite):
 
         self.rect = self.image.get_rect()
         self.rect.topleft = (self.x, self.y)
+
+        if not self.has_item:
+            self.kill()
 
 
 class Wall(pygame.sprite.Sprite):

@@ -1,90 +1,125 @@
 {
     "Frequencia_Up":{
         "id": "1.100.1",
-        "quality": 3,
-        "description_item": "Frequency Up",
+        "qualidade": 3,
+        "pool" : "tesouro",
+        "item": "Frequência Aumentada",
         "effect": [0.7, "Up", "frequency"]
     },
     "Telecinesia":{
         "id": "1.100.2",
-        "description_item": "Homming Attacks",
-        "effect": [["homming", 1], ["cor", [81, 4, 194]]]
+        "qualidade": 3,
+        "pool": "tesouro",
+        "item": "Ataque teleguiado",
+        "effect": ["homming"]
     },
     "damage_booster1":{
         "id": "1.100.3",
-        "quality": 4,
-        "description_item": "DMG Up",
-        "effect": [[1.5, "Up", "multi"], [0.5, "Up", "damage"]]
+        "qualidade": 4,
+        "pool": "tesouro",
+        "item": "Força Extra",
+        "effect": [[1.5, "Up", "multi"], [0.5, "Up", "dano"]]
     },
-    "proj_bonus1": {
+    "Escopeta": {
         "id": "1.100.4",
-        "quality": 3,
-        "description_item": "Triple Attacks",
+        "qualidade": 3,
+        "pool": "tesouro",
+        "item": "Alto Calibre",
         "effect": [2, "Up", "qtd_proj"]
     },
-    "damage_booster2": {
+    "Balas de chumbo": {
         "id": "1.100.5",
-        "quality": 3,
-        "description_item": "DMG Up",
-        "effect": [[1.0, "Up", "damage"], ["cor", [186, 38, 4]]]
+        "qualidade": 3,
+        "pool": "tesouro",
+        "item": "Deve doer",
+        "effect": [1.0, "Up", "dano"]
     },
     "extra_live1": {
         "id": "1.100.6",
-        "quality": 2,
-        "description_item": "Extra Life",
+        "qualidade": 2,
+        "pool": "tesouro",
+        "item": "Extra Life",
         "effect": [1, "Up", "life"]
     },
     "power_up":{
         "id": "1.100.7",
-        "quality": 4,
-        "description_item": "All stats up!",
-        "effect": [[2, "Up", "health"], [0.3, "Up", "damage"], [1.5, "Up", "multi"], [2.5, "Up", "range"]]
+        "qualidade": 4,
+        "pool": "tesouro",
+        "item": "Power Up!",
+        "effect": [[2, "Up", "health"], [0.3, "Up", "dano"], [1.5, "Up", "multi_atq"], [2.5, "Up", "range"]]
     },
     "doce_leite":{
         "id": "1.100.8",
-        "quality": 2,
-        "description": "HP up",
-        "effect": [2, "Up", "health", "full"]
+        "qualidade": 2,
+        "pool": "tesouro - chefe",
+        "description": "Gosto de infância",
+        "effect": [20, "Up", "health", "full"]
     },
     "churrasco":{
         "id": "1.100.9",
-        "quality": 3,
-        "description_item": "HP up",
-        "effect": [2, "Up", "health", "full"]
+        "qualidade": 3,
+        "pool": "tesouro - chefe",
+        "item": "Espeto ou carne?",
+        "effect": [[20, "Up", "health", "full"], [1.0 , "Up", "dano"]]
     },
     "Côco":{
         "id": "1.100.10",
-        "quality": 1,
-        "description_item": "Sweet",
-        "effect": [2, "Up", "health", "2"]
+        "qualidade": 1,
+        "pool": "tesouro - chefe",
+        "item": "A melhor parte é a água",
+        "effect": [20, "Up", "hp_max", "20"]
     },
     "Abacaxi":{
         "id": "1.100.11",
-        "quality": 1,
-        "description_item": "Sweet",
-        "effect": [2, "Up", "health", "2"]
+        "qualidade": 1,
+        "pool": "tesouro - chefe",
+        "item": "Sem casca e nem a coroa",
+        "effect": [20, "Up", "hp_max", "20"]
     },
     "Mamão":{
         "id": "1.100.12",
-        "quality": 1,
-        "description_item": "Sweet",
-        "effect": [2, "Up", "health", "2"]
+        "qualidade": 1,
+        "pool": "tesouro - chefe",
+        "item": "Sem semente",
+        "effect": [20, "Up", "hp_max", "20"]
     },
     "Banana":{
         "id": "1.100.13",
-        "quality": 1,
-        "description_item": "Sweet",
-        "effect": [2, "Up", "health", "2"]
+        "qualidade": 1,
+        "pool": "tesouro - chefe",
+        "item": "A mais saudável",
+        "effect": [20, "Up", "hp_max", "20"]
     },
     "Botas":{
         "id": "1.100.14",
-        "quality": 1,
-        "description_item": "Speed up",
+        "qualidade": 1,
+        "pool": "tesouro",
+        "item": "Para trabalhar",
         "effect": [0.3, "Up", "speed"]
     },
-    "Calça":{
+    "Macacão":{
         "id": "1.100.15",
-        "description_item": "Speed up",
+        "qualidade": 1,
+        "pool": "tesouro",
+        "item": "Para o mato",
         "effect": [0.3, "Up", "speed"]
+    },
+    "Fragmento1":{
+        "id": "1.100.16",
+        "qualidade": 0,
+        "pool": "chefe",
+        "item": "Mais perto da saida"
+    },
+    "Fragmento2":{
+        "id": "1.100.16",
+        "qualidade": 0,
+        "pool": "chefe",
+        "item": "Mais perto da saida"
+    },
+    "Fragmento3":{
+        "id": "1.100.16",
+        "qualidade": 0,
+        "pool": "chefe",
+        "item": "Mais perto da saida"
     }
 }

@@ -1,7 +1,9 @@
 import pygame
 import sys
+import json
+import os
 
-from random import randint
+from random import randint, choice, choices
 from classes.config import *
 from classes.salas import *
 from classes.character import *
@@ -21,6 +23,38 @@ class Game:
         self.EVENTO_RELOGIO = pygame.USEREVENT + 1
         pygame.time.set_timer(self.EVENTO_RELOGIO, 1000)
 
+        # Sistema de leitura do json
+        diretorio_atual = os.path.dirname(__file__)
+        caminho_json = os.path.join(
+            diretorio_atual, 'assetes', 'dict_geral', 'items_passive.json')
+
+        with open(caminho_json, 'r', encoding='utf-8') as f:
+            self.banco_dados = json.load(f)
+
+    # Método de sorteio
+    def sortear_item(self, tipo_sala):
+        itens_validos = []
+        pesos = []
+
+        for nome, dados in self.banco_dados.items():
+            pool = dados.get("pool", "")
+            qualidade = dados.get("qualidade", 1)
+
+            if 'Fragmento' in nome:
+                continue
+
+            if tipo_sala in pool or 'tesouro - chefe' in pool:
+                itens_validos((nome, dados))
+
+            peso = 1.0 / max(qualidade, 0.1)
+            pesos.append(peso)
+
+        if not itens_validos:
+            return None
+
+        item_escolhido = choices(itens_validos, weights=pesos, k=1)
+        return item_escolhido
+
     def createRoom(self, layout):
         # Primeiro para pegar a string que compõe o mapa
         for pos, row in enumerate(layout):
@@ -31,7 +65,7 @@ class Game:
                 elif column == "P":
                     if not hasattr(self, 'player') or self.player is None:
                         self.player = Player(
-                            self, value, pos, self.player_status)
+                            self, value, pos, self.player_status, False)
                 elif column == "H":
                     Hole(self, value, pos)
                 elif column == "B":
@@ -41,11 +75,30 @@ class Game:
                 elif column in ['N', 'S', 'E', 'O']:
                     Door(self, value, pos, column)
                 elif column == "V":
-                    if not hasattr(self, 'vida') or self.vida is None:
-                        coletavelVida(self, value, pos)
+                    coletavelVida(self, value, pos)
                 elif column == "M":
-                    if not hasattr(self, 'tempo') or self.tempo is None:
-                        coletavelTempo(self, value, pos)
+                    coletavelTempo(self, value, pos)
+                elif column == "T":
+                    Pedestal(self, value, pos)
+
+                    # Identificação de sala
+                    tipo_sala = getattr(self.sala_atual, 'tipo', 'normal')
+
+                    if tipo_sala in ['tesouro', 'chefe']:
+                        item_sorteado = self.sortear_item(tipo_sala)
+
+                        if item_sorteado:
+                            nome_item, dados_item = item_sorteado
+                            ItemPassivo(self, value, pos,
+                                        nome_item, dados_item)
+
+                        if tipo_sala == 'chefe':
+                            frag_nome = choice(
+                                ["Fragmento1", "Fragmento2", "Fragmento3"])
+                            frag_dados = self.banco_itens[frag_nome]
+
+                            ItemPassivo(self, value, pos - 4,
+                                        frag_nome, frag_dados)
 
     def troca_sala(self, novo_layout):
         # Limpar as paredes, blocos, buracos atuais e portas abertas
@@ -91,16 +144,15 @@ class Game:
         self.player = None
         self.player_status = {
             "hp_max": 30,
+            "vida_extra": 0,
             "dano": 3.5,
             "multi_atq": 1.0,
             "alcance": 7.0,
             "atq_speed": 1.0,
             "frequencia": 0.0,
             "speed": 1.0,
-            "sorte": 0.0
+            "qtd_proj": 1
         }
-        self.vida = None
-        self.tempo = None
 
         # Define quantas salas quer no andar
         gerador = MapGenerator(andar)
