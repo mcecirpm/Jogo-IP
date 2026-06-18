@@ -147,13 +147,14 @@ class MapGenerator:
         sala_baixo = extremas[0]
 
         for sala in [sala_esquerda, sala_direita, sala_baixo]:
-            sala.tipo = 'chefe'
+            if(sala != start_room):
+                sala.tipo = 'chefe'
 
-            linha = list(sala.layout[7])
-            linha[10] = 'T'
-            sala.layout[7] = "".join(linha)
+                linha = list(sala.layout[7])
+                linha[10] = 'T'
+                sala.layout[7] = "".join(linha)
 
-            salas_chefe.append(sala)
+                salas_chefe.append(sala)
 
         return self.map, start_room
 

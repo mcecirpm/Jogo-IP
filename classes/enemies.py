@@ -188,3 +188,98 @@ class MulaSemCabeca(pygame.sprite.Sprite): #classe para a mula sem cabeça
                 )
 
                 self.cooldown_tiro = 120 #espera um tempo de +- 2 segundos antes de atirar novamente, limitando a quantidade de projéteis na tela e dando uma chance para o jogador se esquivar
+
+            
+#Criando a Iara:
+class Poder(pygame.sprite.Sprite): 
+
+    def __init__(self, game, x, y):
+
+        self.game = game
+
+        #Ajeitar a imagem do ataque
+        self._layer = PROJ_LAYER
+        self.group = self.game.all_sprites
+
+        pygame.sprite.Sprite.__init__(self, self.group)
+
+       
+        self.image = pygame.Surface((16, 16))
+        self.image.fill((255, 0, 0))
+
+        self.rect = self.image.get_rect()
+        self.rect.centerx = x 
+        self.rect.centery = y
+
+        #Ajeitar as distancias para ficar proporcional o quanto anda
+        player = self.game.player
+        distancia = ((self.rect.centerx - player.rect.centerx)**2 + (self.rect.centery - player.rect.centery)**2)**0.5
+        if distancia == 0:
+            self.dx = 0
+            self.dy = 0
+        else:
+            self.dx = (player.rect.centerx - self.rect.centerx)/distancia
+            self.dy = (player.rect.centery - self.rect.centery)/distancia
+
+        #Uma velocidade qualquer, podemos mudar depois qualquer coisa
+        self.speed = 7
+
+    def update(self):
+        
+        #Ele anda um pouco dependendo da velocidade
+        self.rect.centerx += self.dx * self.speed
+        self.rect.centery += self.dy * self.speed
+
+        #Verifica se houve colisão ou com o jogador(para diminuir o tempo) ou com a parede (para desaparecer)
+        if self.rect.colliderect(self.game.player.rect):
+            self.game.player.tempo -= 10 #Diminui a princípio em 10 segundos, mas a gente pode mudar  
+            self.kill() 
+
+        if pygame.sprite.spritecollide(self, self.game.walls, False):
+            self.kill()
+
+
+
+class Iara(pygame.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.game = game
+
+        #Ajeitar a imagem e as informações principais da iara
+        self.x = x*TILESIZE
+        self.y = y*TILESIZE
+
+
+        self._layer = PLAYER_LAYER
+        self.group = self.game.all_sprites, self.game.enemies
+
+        pygame.sprite.Sprite.__init__(self, self.group)
+
+        self.image = pygame.Surface((TILESIZE, TILESIZE))
+        self.image.fill((0, 0, 255))
+
+        self.rect = self.image.get_rect()
+        self.rect.centerx = self.x 
+        self.rect.centery = self.y
+
+        #Começamos com zero para poder atacar logo
+        self.cooldown_tiro = 0
+
+        self.hitbox = self.rect.copy()
+
+    def take_damage(self, damage): #Só para não dar erro
+        pass
+
+        
+    def update(self):
+        player = self.game.player
+
+        #Calculando a distância para ajeitar o alcance:
+        distancia = ((self.rect.centerx - player.rect.centerx)**2 + (self.rect.centery - player.rect.centery)**2)**0.5    
+        
+        #Primeiro vamos verificar se o jogador tá perto o suficiente
+        if distancia < 128: #Chutei um número qualquer para testar
+            if self.cooldown_tiro == 0: #para esperar um pouco antes de atacar 
+                Poder(self.game, self.rect.centerx, self.rect.centery)
+                self.cooldown_tiro = 60 #Botei 1 segundo, mas podemos trocar depois 
+        if self.cooldown_tiro > 0:
+            self.cooldown_tiro -= 1

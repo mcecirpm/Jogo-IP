@@ -79,6 +79,7 @@ class Game:
                     coletavelTempo(self, value, pos)
                 elif column == "U":
                     MulaSemCabeca(self, value, pos) #criação da mula sem cabeça
+                    Iara(self, value, pos) #Não tava conseguindo enteder direito onde colocar, botei aí para testar
 
     def troca_sala(self, novo_layout):
         # Limpar as paredes, blocos, buracos atuais e portas abertas
