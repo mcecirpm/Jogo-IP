@@ -3,7 +3,7 @@ import sys
 import json
 import os
 
-from random import randint, choice, choices
+from random import choices
 from classes.config import *
 from classes.salas import *
 from classes.character import *
@@ -70,35 +70,13 @@ class Game:
                     Hole(self, value, pos)
                 elif column == "B":
                     Block(self, value, pos)
-                elif column == "T":
-                    Pedestal(self, value, pos)
+
                 elif column in ['N', 'S', 'E', 'O']:
                     Door(self, value, pos, column)
                 elif column == "V":
                     coletavelVida(self, value, pos)
                 elif column == "M":
                     coletavelTempo(self, value, pos)
-                elif column == "T":
-                    Pedestal(self, value, pos)
-
-                    # Identificação de sala
-                    tipo_sala = getattr(self.sala_atual, 'tipo', 'normal')
-
-                    if tipo_sala in ['tesouro', 'chefe']:
-                        item_sorteado = self.sortear_item(tipo_sala)
-
-                        if item_sorteado:
-                            nome_item, dados_item = item_sorteado
-                            ItemPassivo(self, value, pos,
-                                        nome_item, dados_item)
-
-                        if tipo_sala == 'chefe':
-                            frag_nome = choice(
-                                ["Fragmento1", "Fragmento2", "Fragmento3"])
-                            frag_dados = self.banco_itens[frag_nome]
-
-                            ItemPassivo(self, value, pos - 4,
-                                        frag_nome, frag_dados)
 
     def troca_sala(self, novo_layout):
         # Limpar as paredes, blocos, buracos atuais e portas abertas
@@ -124,8 +102,6 @@ class Game:
     def new(self):
         # Quando começa um novo jogo
         self.playing = True
-
-        andar = 10 + randint(2, 6)
 
         self.all_sprites = pygame.sprite.LayeredUpdates()
 
@@ -155,14 +131,8 @@ class Game:
         }
 
         # Define quantas salas quer no andar
-        gerador = MapGenerator(andar)
+        gerador = MapGenerator(4)
         self.map, self.sala_atual = gerador.generate()
-
-        # Sala inicial descoberta por padrão
-        self.sala_atual.foi_visitada = True
-
-        # Começa o gerenciador do mini mapa
-        self.minimapa = Minimap(self)
 
         # Carrega a sala inicial (Start Room)
         self.createRoom(self.sala_atual.layout)
@@ -193,8 +163,6 @@ class Game:
         self.screen.fill(BLACK)
         # Textura do cenário
         self.all_sprites.draw(self.screen)
-        # Desenha o mini mapa sobr posto no HUD
-        self.minimapa.draw(self.screen)
 
         self.clock.tick(FPS)
         pygame.display.update()

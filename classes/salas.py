@@ -123,182 +123,33 @@ class MapGenerator:
                     distancias[vizinha] = dist_atual + 1
                     fila.append(vizinha)
 
-        # Ordena as salas por distância (Decrescente)
-        salas_ordenadas = sorted(
-            distancias.items(), key=lambda x: x[1], reverse=True)
-
-        # As 3 salas mais distantes se tornam salas de Chefe (Caveira)
         salas_chefe = []
 
-        for sala, dist in salas_ordenadas:
-            if sala == start_room:
-                continue
+        extremas = sorted(self.map, key=lambda s: s.x)
+        sala_esquerda = extremas[0]
 
-            muito_perto = False
-
-            for chefe in salas_chefe:
-                distancia = abs(sala.x - chefe.x) + abs(sala.y - chefe.y)
-
-                quantidade_vizinhos = sum(
-                    1 for vizinho in sala.vizinho.values()
-                    if vizinho is not None
-                )
-
-                if distancia <= 2:
-                    muito_perto = True
-                    break
-
-                if quantidade_vizinhos != 1:
-                    muito_perto = True
-                    break
-
-            if not muito_perto:
-                sala.tipo = 'chefe'
-                salas_chefe.append(sala)
-
-                linha = list(sala.layout[7])
-                linha[10] = 'T'
-
-                sala.layout[7] = "".join(linha)
-
-            if len(salas_chefe) >= 3:
-                break
-
-        # Filtra as salas restantes para escolher as de Tesouro (Diamante)
-        candidatas_tesouro = []
-
-        for sala in self.map:
-            if sala == start_room:
-                continue
-
-            if sala in salas_chefe:
-                continue
-
-            quantidade_vizinhos = sum(
-                1 for vizinho in sala.vizinho.values()
-                if vizinho is not None
-            )
-
-            if quantidade_vizinhos == 1:
-                candidatas_tesouro.append(sala)
-
-        # Escolhe até 2 delas
-        salas_tesouro = random.sample(
-            candidatas_tesouro,
-            min(2, len(candidatas_tesouro))
+        extremas = sorted(
+            [s for s in self.map if s != sala_esquerda],
+            key=lambda s: s.x,
+            reverse=True
         )
+        sala_direita = extremas[0]
 
-        for sala in salas_tesouro:
-            sala.tipo = 'tesouro'
+        extremas = sorted(
+            [s for s in self.map if s not in [sala_esquerda, sala_direita]],
+            key=lambda s: s.y,
+            reverse=True
+        )
+        sala_baixo = extremas[0]
+
+        for sala in [sala_esquerda, sala_direita, sala_baixo]:
+            sala.tipo = 'chefe'
 
             linha = list(sala.layout[7])
             linha[10] = 'T'
             sala.layout[7] = "".join(linha)
 
-        return self.map, start_room
-
-
-class Minimap:
-    def __init__(self, game):
-        self.game = game
-
-        caminho_sprite = os.path.join(os.path.dirname(
-            __file__), '..', 'assetes', 'sprites', 'tileset_mapa.png')
-
-        try:
-            self.spritesheet = pygame.image.load(
-                caminho_sprite).convert_alpha()
-            self.spritesheet.set_alpha(OPACIDADE)
-        except pygame.error:
-            self.spritesheet = pygame.Surface((32, 32))
-            self.spritesheet.fill((255, 0, 255))
-
-        # Recorta os quadrantes da imagem original (16x16 pixels cada)
-        self.sala_escura = pygame.transform.scale(
-            self.spritesheet.subsurface(pygame.Rect(0, 0, 16, 16)), (16, 16))
-
-        self.sala_clara = pygame.transform.scale(
-            self.spritesheet.subsurface(pygame.Rect(16, 0, 16, 16)), (16, 16))
-
-        self.caveira = pygame.transform.scale(
-            self.spritesheet.subsurface(pygame.Rect(0, 16, 16, 16)), (16, 16))
-
-        self.diamante = pygame.transform.scale(
-            self.spritesheet.subsurface(pygame.Rect(16, 16, 16, 16)), (16, 16))
-
-        # Posição central de renderização do mini mapa na tela (Canto superior direito)
-        self.centro_hud_x = 580
-        self.centro_hud_y = 60
-
-        self.tamanho_sala = 16
-
-    def draw(self, screen):
-        sala_atual = self.game.sala_atual
-        if not sala_atual:
-            return
-
-        # Só exibe salas já visitadas ou salas adjacentes a uma visitada
-        salas_visiveis = set()
-        for sala in self.game.map:
-            if sala.foi_visitada:
-                salas_visiveis.add(sala)
-                for vizinha in sala.vizinho.values():
-                    if vizinha:
-                        salas_visiveis.add(vizinha)
-
-        # Renderiza a malha de salas mapeadas
-        for sala in self.game.map:
-            if sala not in salas_visiveis:
-                continue
-
-            # Calcula o deslocamento (offset) baseado na posição estrutural em relação à sala atual
-            dx = sala.x - sala_atual.x
-            dy = sala.y - sala_atual.y
-
-            pos_x = self.centro_hud_x + (dx * self.tamanho_sala)
-            pos_y = self.centro_hud_y + (dy * self.tamanho_sala)
-
-            # Desenha o fundo da sala correspondente (Visitada vs Não Visitada)
-            if sala.foi_visitada:
-                screen.blit(self.sala_clara, (pos_x, pos_y))
-            else:
-                screen.blit(self.sala_escura, (pos_x, pos_y))
-
-            # Insere os marcadores por cima (Apenas se a sala for do tipo especial correspondente)
-            if sala.tipo == 'chefe':
-                screen.blit(self.caveira, (pos_x, pos_y))
-            elif sala.tipo == 'tesouro':
-                screen.blit(self.diamante, (pos_x, pos_y))
-
-        # Desenha uma borda branca sutil piscando/fixa na sala atual onde o jogador se encontra
-        pygame.draw.rect(screen, (255, 255, 255), (self.centro_hud_x,
-                         self.centro_hud_y, self.tamanho_sala, self.tamanho_sala), 1)
-
-
-class Pedestal(pygame.sprite.Sprite):
-    def __init__(self, game, x, y):
-        self.game = game
-        self.has_item = True
-
-        self._layer = DETAILS_LAYER
-        self.groups = (self.game.all_sprites, self.game.pedestal)
-
-        pygame.sprite.Sprite.__init__(self, self.groups)
-
-        self.x = x * TILESIZE
-        self.y = y * TILESIZE
-
-        # Correção de bug: ao entrar na sala do tesouro o jogo fecha
-        caminho_sprite = os.path.join(os.path.dirname(
-            __file__), '..', 'assetes', 'sprites', 'pedestal_placeholder.png')
-
-        self.image = pygame.image.load(caminho_sprite).convert_alpha()
-
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (self.x, self.y)
-
-        if not self.has_item:
-            self.kill()
+            salas_chefe.append(sala)
 
 
 class Wall(pygame.sprite.Sprite):
