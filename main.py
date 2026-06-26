@@ -9,6 +9,7 @@ from classes.salas import *
 from classes.character import *
 from classes.enemies import *
 from classes.collectibles import *
+from classes.hud import HUD
 
 
 class Game:
@@ -140,6 +141,9 @@ class Game:
         # Carrega a sala inicial (Start Room)
         self.createRoom(self.sala_atual.layout)
 
+        # Criação do hud depois do player, porque ele lê dados do self.player
+        self.hud = HUD(self)
+
     def events(self):
         # Game loop event
         for event in pygame.event.get():
@@ -166,6 +170,9 @@ class Game:
         self.screen.fill(BLACK)
         # Textura do cenário
         self.all_sprites.draw(self.screen)
+
+        # Desenha vida, tempo e inventário "por cima"
+        self.hud.draw(self.screen)
 
         self.clock.tick(FPS)
         pygame.display.update()
