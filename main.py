@@ -162,6 +162,10 @@ class Game:
 
         if self.player:
             self.check_door_collisions()
+            
+            #Verfica se o jogador morreu, se sim, termina o jogo
+            if self.player.hp <= 0:
+                self.playing = False
 
         if self.espera_porta > 0:
             self.espera_porta -= 1
