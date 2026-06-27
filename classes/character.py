@@ -49,8 +49,13 @@ class Player(pygame.sprite.Sprite):
 
         self.tempo = 300  # 5 minutos em segundos
 
+        # Efeito do Curupira
+        self.velocidade_multiplicador = 1
+        self.atordoado = False
+        self.tempo_atordoado = 0
+
     def moviment(self):
-        speed = self.status['speed'] * 4
+        speed = self.status['speed'] * 4 * self.velocidade_multiplicador #a velocidade do jogador é multiplicada pelo efeito do Curupira, que deixa o jogador mais lento
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a]:
@@ -112,6 +117,13 @@ class Player(pygame.sprite.Sprite):
             return 21 - 7 * (frequencia)
 
     def update(self):
+        #Atualiza efeito do Curupira
+        if self.atordoado:
+            self.tempo_atordoado -= 1
+            if self.tempo_atordoado <= 0:
+                self.atordoado = False
+                self.velocidade_multiplicador = 1
+
         self.moviment()
         self.attack()
 
@@ -134,6 +146,13 @@ class Player(pygame.sprite.Sprite):
 
         self.x_change = 0
         self.y_change = 0
+
+    def aplicar_atordoamento(self):
+        if self.atordoado: # se o jogador já estiver atordoado, não aplica o efeito novamente
+            return
+        self.atordoado = True #jogador atordoado
+        self.velocidade_multiplicador = 0.5 # deixa a velocidade do jogador pela metade
+        self.tempo_atordoado = FPS * 5 #o jogador fica atordoado por 5 segundos, depois volta a velocidade normal
 
     def collide_walls(self, direction):
         if direction == "x":
@@ -321,7 +340,6 @@ class Projectile(pygame.sprite.Sprite):
                 hit.take_damage(self.damage)
                 self.kill()
                 break
-
 
 class Inventario:
     def __init__(self, player):

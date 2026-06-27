@@ -86,6 +86,10 @@ class MapGenerator:
                 row_list[10] = 'U'
                 room.layout[5] = "".join(row_list)
 
+                row = list(room.layout[9]) #onde o curupira vai ficar
+                row[6] = 'C'
+                room.layout[9] = "".join(row)
+
                 # Forçando o coletável de vida perto do jogador para teste
                 row_list = list(room.layout[9])
                 row_list[8] = 'V'

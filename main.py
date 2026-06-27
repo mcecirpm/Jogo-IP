@@ -1,3 +1,5 @@
+from turtle import pos
+
 import pygame
 import sys
 import json
@@ -81,6 +83,8 @@ class Game:
                 elif column == "U":
                     MulaSemCabeca(self, value, pos) #criação da mula sem cabeça
                     Iara(self, value, pos) #Não tava conseguindo enteder direito onde colocar, botei aí para testar
+                elif column == "C":
+                    Curupira(self, value, pos) #criação do curupira
 
     def troca_sala(self, novo_layout):
         # Limpar as paredes, blocos, buracos atuais e portas abertas

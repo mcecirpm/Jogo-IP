@@ -283,3 +283,25 @@ class Iara(pygame.sprite.Sprite):
                 self.cooldown_tiro = 60 #Botei 1 segundo, mas podemos trocar depois 
         if self.cooldown_tiro > 0:
             self.cooldown_tiro -= 1
+
+class Curupira(pygame.sprite.Sprite):
+
+    def __init__(self, game, x, y):
+
+        self.game = game
+        self._layer = PLAYER_LAYER
+        self.group = self.game.all_sprites
+
+        pygame.sprite.Sprite.__init__(self, self.group)
+
+        self.image = pygame.Surface((TILESIZE, TILESIZE))
+        self.image.fill((0, 180, 0))   #quadrado verde
+        self.rect = self.image.get_rect()
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+
+    def update(self):
+
+        if self.rect.colliderect(self.game.player.rect): #saber se o jogador encostou no curupira
+            self.game.player.aplicar_atordoamento() #aplica o efeito de atordoamento no jogador
+            self.kill() #o curupira desaparece apos aplicar o efeito
