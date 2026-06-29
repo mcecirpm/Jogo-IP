@@ -25,13 +25,11 @@ class Player(pygame.sprite.Sprite):
         self.facing = 'face_down'
 
         self.image = pygame.Surface([self.width, self.height])
-        self.image.fill(RED)
+        self.image.fill(GREEN) #a cor do jogador é verde
 
         self.rect = self.image.get_rect()
         self.rect.x = self.x
         self.rect.y = self.y
-
-        self.head = PlayerHead(self.game, self)
 
         self.inventario = Inventario(self)
 
@@ -74,9 +72,9 @@ class Player(pygame.sprite.Sprite):
     def attack(self):
         keys = pygame.key.get_pressed()
 
-        if self.shoot_cooldown == 0 and hasattr(self, 'head'):
-            hx = self.head.rect.centerx
-            hy = self.head.rect.centery
+        if self.shoot_cooldown == 0: 
+            hx = self.rect.centerx
+            hy = self.rect.centery
             shoot = False
 
             damage = self.status['dano'] * self.status['multi_atq']
@@ -257,30 +255,11 @@ class Player(pygame.sprite.Sprite):
                     self.inventario.adicionar_chave(hit.nome_item)
 
 
-class PlayerHead(pygame.sprite.Sprite):
+class PlayerHead(pygame.sprite.Sprite): #deixei a classe para não dar erro, mas não está sendo usada
     def __init__(self, game, player):
-        self.game = game
-        self.player = player
-
-        self._layer = PLAYER_HEAD_LAYER
-        self.group = self.game.all_sprites
-
-        # Objeto filho
-        pygame.sprite.Sprite.__init__(self, self.group)
-
-        self.width = TILESIZE
-        self.height = TILESIZE
-
-        self.image = pygame.Surface([self.width, self.height])
-        self.image.fill(GREEN)
-
-        self.rect = self.image.get_rect()
-
+        super().__init__
     def update(self):
-        self.rect.centerx = self.player.rect.centerx
-
-        self.rect.centery = self.player.rect.centery - (TILESIZE // 2)
-
+        pass
 
 class Projectile(pygame.sprite.Sprite):
     def __init__(self, game, x, y, facing, damage, speed_proj, alcance):
