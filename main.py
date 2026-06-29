@@ -7,7 +7,7 @@ import os
 
 from random import choices
 from classes.config import *
-from classes.salas import *
+from classes.labirinto import MapGenerator, salas, Wall, Block, Door
 from classes.character import *
 from classes.enemies import *
 from classes.collectibles import *
@@ -69,8 +69,6 @@ class Game:
                     if not hasattr(self, 'player') or self.player is None:
                         self.player = Player(
                             self, value, pos, self.player_status, False)
-                elif column == "H":
-                    Hole(self, value, pos)
                 elif column == "B":
                     Block(self, value, pos)
 
@@ -81,12 +79,13 @@ class Game:
                 elif column == "M":
                     coletavelTempo(self, value, pos)
                 elif column == "U":
-                    # criação da mula sem cabeça
-                    MulaSemCabeca(self, value, pos)
-                    # Não tava conseguindo enteder direito onde colocar, botei aí para testar
-                    Iara(self, value, pos)
+                    MulaSemCabeca(self, value, pos) #criação da mula sem cabeça
                 elif column == "C":
-                    Curupira(self, value, pos)  # criação do curupira
+                    Curupira(self, value, pos) #criação do curupira
+                elif column == "I":
+                    Iara(self, value, pos) #criação da iara
+                elif column == "K":
+                    Chave_temporaria(self, value, pos) #criação da chave
 
     def troca_sala(self, novo_layout):
         # Limpar as paredes, blocos, buracos atuais e portas abertas
@@ -99,6 +98,12 @@ class Game:
         for sprite in self.doors:
             sprite.kill()
         for sprite in self.pedestal:
+            sprite.kill()
+        for sprite in self.enemies:
+            sprite.kill()
+        for sprite in self.pickup:
+            sprite.kill()
+        for sprite in self.projectiles:
             sprite.kill()
         # Atualiza a sala atual
         self.sala_atual = novo_layout
@@ -141,14 +146,8 @@ class Game:
         }
 
         # Define quantas salas quer no andar
-        gerador = MapGenerator(10)
-        self.map, self.sala_atual = gerador.generate()
-
-        # Sala inicial descoberta por padrão
-        self.sala_atual.foi_visitada = True
-
-        # Começa o gerenciador do mini mapa
-        self.minimapa = Minimap(self)
+        gerador = MapGenerator()
+        self.map, self.sala_atual = gerador.generate(salas)
 
         # Carrega a sala inicial (Start Room)
         self.createRoom(self.sala_atual.layout)
@@ -174,8 +173,8 @@ class Game:
 
         if self.player:
             self.check_door_collisions()
-
-            # Verfica se o jogador morreu, se sim, termina o jogo
+            
+            #Verfica se o jogador morreu, se sim, termina o jogo
             if self.player.hp <= 0:
                 self.playing = False
 
@@ -186,9 +185,6 @@ class Game:
         self.screen.fill(BLACK)
         # Textura do cenário
         self.all_sprites.draw(self.screen)
-
-        if hasattr(self, 'minimapa'):
-            self.minimapa.draw(self.screen)
 
         # Desenha vida, tempo e inventário "por cima"
         self.hud.draw(self.screen)
@@ -225,28 +221,29 @@ class Game:
             # Verifica qual é a sala vizinha nessa direção
             nova_sala = self.sala_atual.vizinho[direcao]
 
+
             # Se a sala existir, fazemos a transição
             if nova_sala:
                 self.troca_sala(nova_sala)
 
                 if direcao == 'N':
                     self.player.rect.x = 10 * TILESIZE
-                    self.player.rect.y = 12 * TILESIZE
+                    self.player.rect.y = 13 * TILESIZE
                     self.espera_porta = 20
 
                 elif direcao == 'S':
                     self.player.rect.x = 10 * TILESIZE
-                    self.player.rect.y = 2 * TILESIZE
+                    self.player.rect.y = 1 * TILESIZE
                     self.espera_porta = 20
 
                 elif direcao == 'E':
-                    self.player.rect.x = 2 * TILESIZE
-                    self.player.rect.y = 7 * TILESIZE
+                    self.player.rect.x = 1 * TILESIZE
+                    self.player.rect.y = 13 * TILESIZE
                     self.espera_porta = 20
 
                 elif direcao == 'O':
-                    self.player.rect.x = 18 * TILESIZE
-                    self.player.rect.y = 7 * TILESIZE
+                    self.player.rect.x = 19 * TILESIZE
+                    self.player.rect.y = 13 * TILESIZE
                     self.espera_porta = 20
 
 

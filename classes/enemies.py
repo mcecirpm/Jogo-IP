@@ -203,8 +203,8 @@ class Iara(pygame.sprite.Sprite):
         self.image.fill((0, 0, 255))
 
         self.rect = self.image.get_rect()
-        self.rect.centerx = self.x
-        self.rect.centery = self.y
+        self.rect.centerx = self.x + TILESIZE // 2
+        self.rect.centery = self.y + TILESIZE // 2
 
         # Começamos com zero para poder atacar logo
         self.cooldown_tiro = 0
@@ -236,7 +236,7 @@ class Curupira(pygame.sprite.Sprite):
 
         self.game = game
         self._layer = PLAYER_LAYER
-        self.group = self.game.all_sprites
+        self.group = self.game.all_sprites, self.game.enemies
 
         pygame.sprite.Sprite.__init__(self, self.group)
 
