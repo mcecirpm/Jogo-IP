@@ -36,8 +36,7 @@ class BolaDeFogo(pygame.sprite.Sprite):  # classe para os projeteis da mula sem 
         self.rect.y += self.dy * self.speed
 
         if self.rect.colliderect(self.game.player.rect):
-            self.game.player.hp = max(
-                0, self.game.player.hp - 1)  # dá dano ao jogador
+            self.game.player.hp = max(0, self.game.player.hp - 3)  # dá dano ao jogador
             self.kill()  # destrói o projétil ao colidir com o jogador
 
         if pygame.sprite.spritecollide(self, self.game.walls, False):
@@ -67,20 +66,62 @@ class MulaSemCabeca(pygame.sprite.Sprite):  # classe para a mula sem cabeça
         self.rect.x = self.x
         self.rect.y = self.y
 
+        # posição inicial da mula sem cabeça para que ela possa voltar para lá caso o jogador se afaste
+        self.pos_inicial_x = self.x
+        self.pos_inicial_y = self.y
+
         self.hitbox = self.rect.copy()
-
         self.speed = 2
-
         self.cooldown_tiro = 0
+
+        self.hp = 9 # a mula tem 9 vidas
+        self.invencivel_timer = 0 # p ñ morrer com 1 clique
+
+        self.perseguindo = False # flag para saber se a mula sem cabeça está perseguindo o jogador
 
     # a mula sem cabeça não recebe dano, então esse método é só um placeholder para evitar erros caso o jogador tente atacar ela
     def take_damage(self, damage):
-        pass
+        if self.invencivel_timer == 0:
+            self.hp -= damage
+            self.invencivel_timer = 15 #fica invencivel por alguns frames
+
+            if self.hp <= 0:
+                self.kill()  # a mula sem cabeça morre se a vida chegar a zero
+
+    def visao_limpa(self, player):
+        mula_centro = self.rect.center
+        jogador_centro = player.rect.center
+
+        tolerancia = TILESIZE // 2  # tolerância para considerar que a linha de visão está limpa
+
+        no_mesmo_eixo_x = abs(mula_centro[1] - jogador_centro[1]) < tolerancia
+        no_mesmo_eixo_y = abs(mula_centro[0] - jogador_centro[0]) < tolerancia
+
+        if not no_mesmo_eixo_x and not no_mesmo_eixo_y:
+            return False
+        
+        if no_mesmo_eixo_x:
+            x1 = min(mula_centro[0], jogador_centro[0])
+            x2 = max(mula_centro[0], jogador_centro[0])
+            raio_de_visao_rect = pygame.Rect(x1, mula_centro[1] - 2, x2 - x1, 4)  # cria um retângulo horizontal de 4 pixels de altura
+        else:
+            y1 = min(mula_centro[1], jogador_centro[1])
+            y2 = max(mula_centro[1], jogador_centro[1])
+            raio_de_visao_rect = pygame.Rect(mula_centro[0] - 2, y1, 4, y2 - y1)  # cria um retângulo vertical de 4 pixels de largura
+
+        for parede in self.game.walls: # verifica se há alguma parede entre a mula sem cabeça e o jogador
+            if raio_de_visao_rect.colliderect(parede.rect):
+                return False  # há uma parede entre a mula sem cabeça e o jogador
+
+        return True  # a visão está limpa
 
     def update(self):
+        if self.invencivel_timer > 0: #diminui o timer de invencinilidade se tomou dano há pouco
+            self.invencivel_timer -= 1
+            if self.invencivel_timer == 0:
+                self.image.fill((255, 100, 0))  # volta a cor original da mula sem cabeça
 
         player = self.game.player
-
         if player is None:
             return
 
@@ -90,49 +131,86 @@ class MulaSemCabeca(pygame.sprite.Sprite):  # classe para a mula sem cabeça
 
         distancia = math.sqrt(dx**2 + dy**2)
 
-        # Só persegue se estiver longe
-        if distancia > 120:
-            # mov horizontal
-            if self.rect.centerx < player.rect.centerx:
-                self.rect.x += self.speed
+        raio_de_visao = 180 # raio de visão da mula sem cabeça em 180 pixels
+        distancia_minima = 45
 
-            elif self.rect.centerx > player.rect.centerx:
-                self.rect.x -= self.speed
-            # mov vertical
-            if self.rect.centery < player.rect.centery:
-                self.rect.y += self.speed
+        x_distancia = 0
+        y_distancia = 0
 
-            elif self.rect.centery > player.rect.centery:
-                self.rect.y -= self.speed
+        if not self.perseguindo:
+            if distancia <= raio_de_visao and self.visao_limpa(player):
+                self.perseguindo = True
+
+        if self.perseguindo:
+            if distancia > distancia_minima:
+                if self.rect.centerx < player.rect.centerx:
+                    x_distancia += self.speed
+                elif self.rect.centerx > player.rect.centerx:
+                    x_distancia -= self.speed
+
+                if self.rect.centery < player.rect.centery:
+                    y_distancia += self.speed
+                elif self.rect.centery > player.rect.centery:
+                    y_distancia -= self.speed
+            else:
+                x_distancia = 0
+                y_distancia = 0
+
+        self.rect.x += x_distancia
+        colidiu_x = self.collide_walls('x', x_distancia)
+        self.rect.y += y_distancia
+        colidiu_y = self.collide_walls('y', y_distancia)
+
+        if self.perseguindo and distancia > distancia_minima and (colidiu_x or colidiu_y):
+            if colidiu_x and not colidiu_y:
+                self.rect.y += self.speed if dy > 0 else -self.speed
+                self.collide_walls('y', self.speed if dy > 0 else -self.speed)
+            elif colidiu_y and not colidiu_x:
+                self.rect.x += self.speed if dx > 0 else -self.speed
+                self.collide_walls('x', self.speed if dx > 0 else -self.speed)
 
         self.hitbox = self.rect.copy()
 
+        # A mula sem cabeça atira projéteis em direção ao jogador se ele estiver dentro de um certo alcance
         if self.cooldown_tiro > 0:
             self.cooldown_tiro -= 1
 
-        if self.cooldown_tiro == 0:
+        if self.cooldown_tiro == 0 and self.perseguindo:
+            if distancia < raio_de_visao:
+                dx_tiro = player.rect.centerx - self.rect.centerx
+                dy_tiro = player.rect.centery - self.rect.centery
+                distancia_tiro = (dx_tiro**2 + dy_tiro**2)**0.5
 
-            dx = player.rect.centerx - self.rect.centerx
-            dy = player.rect.centery - self.rect.centery
+                if distancia_tiro > 0:
+                    dx_tiro /= distancia_tiro  # normalização do vetor direção
+                    dy_tiro /= distancia_tiro
 
-            distancia = (dx**2 + dy**2)**0.5
+                    BolaDeFogo(
+                        self.game,
+                        self.rect.centerx,
+                        self.rect.centery,
+                        dx_tiro,
+                        dy_tiro
+                    )
 
-            # s[o atira a depender da distancia do jogador, para não ficar atirando a todo momento
-            if distancia > 0 and distancia < 250:
+                    self.cooldown_tiro = 120  # espera um tempo de +- 2 segundos antes de atirar novamente, limitando a quantidade de projéteis na tela e dando uma chance para o jogador se esquivar
 
-                dx /= distancia  # normalização do vetor direção
-                dy /= distancia
+    def collide_walls(self, direcao, distancia):
+        bateu_parede = pygame.sprite.spritecollide(self, self.game.walls, False)
+        if bateu_parede:
+            if direcao == 'x':
+                if distancia > 0:  # movendo para a direita
+                    self.rect.x = bateu_parede[0].rect.left - self.rect.width
+                if distancia < 0:  # movendo para a esquerda
+                    self.rect.x = bateu_parede[0].rect.right
+            if direcao == 'y':
+                if distancia > 0:  # movendo para baixo
+                    self.rect.y = bateu_parede[0].rect.top - self.rect.height
+                if distancia < 0:  # movendo para cima
+                    self.rect.y = bateu_parede[0].rect.bottom
 
-                BolaDeFogo(
-                    self.game,
-                    self.rect.centerx,
-                    self.rect.centery,
-                    dx,
-                    dy
-                )
-
-                self.cooldown_tiro = 120  # espera um tempo de +- 2 segundos antes de atirar novamente, limitando a quantidade de projéteis na tela e dando uma chance para o jogador se esquivar
-
+            return True
+        return False
 
 # Criando a Iara:
 class Poder(pygame.sprite.Sprite):
@@ -183,9 +261,6 @@ class Poder(pygame.sprite.Sprite):
         if pygame.sprite.spritecollide(self, self.game.walls, False):
             self.kill()
 
-# Inimigo
-
-
 class Iara(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
         self.game = game
@@ -231,7 +306,6 @@ class Iara(pygame.sprite.Sprite):
 
 
 class Curupira(pygame.sprite.Sprite):
-
     def __init__(self, game, x, y):
 
         self.game = game
