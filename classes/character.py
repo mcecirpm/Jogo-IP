@@ -115,7 +115,6 @@ class Player(pygame.sprite.Sprite):
             return 21 - 7 * (frequencia)
 
     def update(self):
-        #Atualiza efeito do Curupira
         if self.atordoado:
             self.tempo_atordoado -= 1
             if self.tempo_atordoado <= 0:
@@ -124,7 +123,6 @@ class Player(pygame.sprite.Sprite):
 
         self.moviment()
         self.attack()
-
         self.coletar_itens()
 
         if self.shoot_cooldown > 0:
@@ -135,12 +133,14 @@ class Player(pygame.sprite.Sprite):
         self.collide_blocks('x')
         self.collide_holes('x')
         self.collid_pedestal('x')
+        self.collide_porta_bloqueada('x')  
 
         self.rect.y += self.y_change
         self.collide_walls('y')
         self.collide_blocks('y')
         self.collide_holes('y')
         self.collid_pedestal('y')
+        self.collide_porta_bloqueada('y')  
 
         self.x_change = 0
         self.y_change = 0
@@ -246,13 +246,38 @@ class Player(pygame.sprite.Sprite):
             elif hit.tipo == 'tempo':
                 self.tempo += 15
                 self.inventario.registrar_tempo()
-            elif hit.tipo == 'chave':                        # <- adiciona antes do passivo
+            elif hit.tipo == 'chave':
                 self.inventario.contagem_chave += 1
+                pos_chave = (self.game.sala_atual.x, self.game.sala_atual.y, hit.grid_x, hit.grid_y)
+                self.game.chaves_coletadas.add(pos_chave)
             elif hit.tipo == 'passivo':
                 self.inventario.adicionar_item_passivo(
                     hit.nome_item, hit.dados_item)
                 if "fragmento" in hit.nome_item.lower():
                     self.inventario.adicionar_chave(hit.nome_item)
+
+    def collide_porta_bloqueada(self, direction):
+        from classes.labirinto import salas
+
+        sala_atual = self.game.sala_atual
+        proxima_sala_final = salas[(2, -2)]
+
+        hits_porta = pygame.sprite.spritecollide(self, self.game.doors, False)
+
+        for porta in hits_porta:
+            vizinho = sala_atual.vizinho[porta.direcao]
+
+            if vizinho == proxima_sala_final and self.inventario.contagem_chave < 3:
+                if direction == "x":
+                    if self.x_change > 0:
+                        self.rect.x = porta.rect.left - self.rect.width
+                    elif self.x_change < 0:
+                        self.rect.x = porta.rect.right
+                elif direction == "y":
+                    if self.y_change > 0:
+                        self.rect.y = porta.rect.top - self.rect.height
+                    elif self.y_change < 0:
+                        self.rect.y = porta.rect.bottom
 
 
 class PlayerHead(pygame.sprite.Sprite): #deixei a classe para não dar erro, mas não está sendo usada

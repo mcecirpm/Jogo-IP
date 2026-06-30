@@ -75,22 +75,26 @@ class Game:
                 elif column in ['N', 'S', 'E', 'O']:
                     Door(self, value, pos, column)
                 elif column == "V":
-                    coletavelVida(self, value, pos)
+                    if self.primeira_visita:
+                        coletavelVida(self, value, pos)
                 elif column == "M":
-                    coletavelTempo(self, value, pos)
+                    if self.primeira_visita:
+                        coletavelTempo(self, value, pos)
                 elif column == "U":
-                    MulaSemCabeca(self, value, pos) #criação da mula sem cabeça
+                    MulaSemCabeca(self, value, pos)
                 elif column == "C":
-                    Curupira(self, value, pos) #criação do curupira
+                    Curupira(self, value, pos)
                 elif column == "I":
-                    Iara(self, value, pos) #criação da iara
+                    Iara(self, value, pos)
                 elif column == "K":
-                    Chave_temporaria(self, value, pos) #criação da chave
+                    if self.primeira_visita:
+                        Chave_temporaria(self, value, pos)
                 elif column == "A":
-                    ColetavelChave(self, value, pos)
+                    chave_pos = (self.sala_atual.x, self.sala_atual.y, value, pos)
+                    if chave_pos not in self.chaves_coletadas:
+                        ColetavelChave(self, value, pos)
 
     def troca_sala(self, novo_layout):
-        # Limpar as paredes, blocos, buracos atuais e portas abertas
         for sprite in self.walls:
             sprite.kill()
         for sprite in self.blocks:
@@ -107,13 +111,11 @@ class Game:
             sprite.kill()
         for sprite in self.projectiles:
             sprite.kill()
-        # Atualiza a sala atual
-        self.sala_atual = novo_layout
 
-        # Maracação de visita ao entrar
+        self.sala_atual = novo_layout
+        self.primeira_visita = not self.sala_atual.foi_visitada  
         self.sala_atual.foi_visitada = True
 
-        # Carrega o novo layout
         self.createRoom(self.sala_atual.layout)
 
     def new(self):
@@ -147,9 +149,16 @@ class Game:
             "qtd_proj": 1
         }
 
+        self.chaves_coletadas = set() 
+
+        self.aviso_porta_timer = 0
+
         # Define quantas salas quer no andar
         gerador = MapGenerator()
         self.map, self.sala_atual = gerador.generate(salas)
+
+        self.primeira_visita = True  
+        self.sala_atual.foi_visitada = True  
 
         # Carrega a sala inicial (Start Room)
         self.createRoom(self.sala_atual.layout)
@@ -226,6 +235,11 @@ class Game:
 
             # Se a sala existir, fazemos a transição
             if nova_sala:
+                # Verifica se é a sala final e se o jogador tem as 3 chaves
+                if nova_sala == salas[(2, -2)] and self.player.inventario.contagem_chave < 3:
+                    self.aviso_porta_timer = 180 
+                    return  # Bloqueia a passagem
+
                 self.troca_sala(nova_sala)
 
                 if direcao == 'N':

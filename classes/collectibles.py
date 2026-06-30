@@ -18,8 +18,11 @@ class ColetavelChave(pygame.sprite.Sprite):
         self.width = TILESIZE
         self.height = TILESIZE
 
+        self.grid_x = x   # <- adiciona
+        self.grid_y = y   # <- adiciona
+
         self.image = pygame.Surface([self.width, self.height])
-        self.image.fill((255, 20, 147))  # Rosa  
+        self.image.fill((255, 20, 147))
 
         self.rect = self.image.get_rect()
         self.rect.x = self.x

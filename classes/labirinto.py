@@ -27,22 +27,22 @@ salas_layout = {
     ],
 
     (0, -1): [
-    "WWWWWWWWWWNWWWWWWWWWW",
-    "WV..IW...A.........MW",  # <- A aqui, linha 1, próximo à porta N
-    "W.W.W.WWWWWWWWWWWWW.W",
-    "W.W.W.WI....W....V..W",
-    "W.WWW.WWW.W.W.WWWWW.W",
-    "WM.IWM....W..MWI....W",
-    "W.W.WWWWWWWWWWW.WWWWW",
-    "W.W........V..W.W..IW",
-    "W.WWWWWWWWW.W.W.W.WWW",
-    "W.WI...M..W.W.W.WV..W",
-    "W.WWW.WWW.W.W.W.WWW.W",
-    "W.....WIW.W.WIW.W...W",
-    "WWWWWWW.W.W.WWW.W.W.W",
-    "WV...............IWMW",
-    "WWWWWWWWWWSWWWWWWWWWW"
-    ],
+        "WWWWWWWWWWNWWWWWWWWWW",
+        "WV..IW.............MW",  
+        "W.W.W.WWWWWWWWWWWWW.W",
+        "W.W.W.WI....W..A.V..W",
+        "W.WWW.WWW.W.W.WWWWW.W",
+        "WM.IWM....W..MWI....W",
+        "W.W.WWWWWWWWWWW.WWWWW",
+        "W.W........V..W.W..IW",
+        "W.WWWWWWWWW.W.W.W.WWW",
+        "W.WI...M..W.W.W.WV..W",
+        "W.WWW.WWW.W.W.W.WWW.W",
+        "W.....WIW.W.WIW.W...W",
+        "WWWWWWW.W.W.WWW.W.W.W",
+        "WV...................W",
+        "WWWWWWWWWWSWWWWWWWWWW"
+ ],
 
     (0, -2): [
         "WWWWWWWWWWWWWWWWWWWWW",
@@ -58,7 +58,7 @@ salas_layout = {
         "WWW.W.WWWWWWW.W.WWW.W",
         "W...WMWM...VW.W.....W",
         "W.WWWWW.WWW.W.WWWWWWW",
-        "W...........WM.....AE",  # A antes do E para ficar perto da saída
+        "WA..........WM......E", 
         "WWWWWWWWWWSWWWWWWWWWW",
     ],
 
@@ -74,9 +74,9 @@ salas_layout = {
         "W.WWWWW.W.W.WWWWW.W.W",
         "W.W....MW.........W.W",
         "W.W.WWWWWWWWWWWWW.W.W",
-        "W.W.....WU.....V...VW",
+        "W.W.....WU..A..V...VW",
         "W.WWWWW.WWWWWWW.WWWWW",
-        "O.............W....AE",  # A antes do E para ficar perto da saída
+        "O.............W.....E", 
         "WWWWWWWWWWWWWWWWWWWWW"
     ],
 

@@ -32,6 +32,7 @@ class HUD:
         self._desenhar_vida(screen, player)
         self._desenhar_tempo(screen, player)
         self._desenhar_inventario(screen, player)
+        self._desenhar_aviso_porta(screen, player)
 
     # Deixa o fundo da barra do hud quase transparente
     def _desenhar_fundo(self, screen):
@@ -225,3 +226,16 @@ class HUD:
 
         qtd_rect = qtd_render.get_rect(center=centro_badge)
         screen.blit(qtd_render, qtd_rect)
+    
+    def _desenhar_aviso_porta(self, screen, player):
+        if self.game.aviso_porta_timer > 0:
+            self.game.aviso_porta_timer -= 1
+
+            alpha = min(255, self.game.aviso_porta_timer * 8)
+
+            texto = f"Você precisa de 3 chaves! ({player.inventario.contagem_chave}/3)"
+            texto_render = self.fonte_pequena.render(texto, True, (255, 20, 147))
+            texto_render.set_alpha(alpha)
+
+            rect = texto_render.get_rect(center=(WIDTH_TELA // 2, self.altura_hud + 30))
+            screen.blit(texto_render, rect)
