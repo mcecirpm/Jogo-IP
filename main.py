@@ -17,7 +17,10 @@ from classes.hud import HUD
 class Game:
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((WIDTH_TELA, HEIGTH_TELA))
+        self.screen = pygame.display.set_mode(
+            (WIDTH_TELA, HEIGTH_TELA),
+            pygame.FULLSCREEN | pygame.SCALED
+        )
         self.clock = pygame.time.Clock()
         self.runnning = True
 
@@ -167,17 +170,34 @@ class Game:
         self.hud = HUD(self)
 
     def events(self):
-        # Game loop event
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.playing = False
                 self.runnning = False
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.playing = False
+                    self.runnning = False
+
+                if event.key == pygame.K_F11:
+                    self.toggle_fullscreen()
+
             if event.type == self.EVENTO_RELOGIO:
                 if self.player is not None:
                     if self.player.tempo > 0:
                         self.player.tempo -= 1
                     else:
                         self.playing = False
+
+    def toggle_fullscreen(self):
+        self.fullscreen = not getattr(self, 'fullscreen', True)
+        if self.fullscreen:
+            self.screen = pygame.display.set_mode(
+                (WIDTH_TELA, HEIGTH_TELA), pygame.FULLSCREEN | pygame.SCALED
+            )
+        else:
+            self.screen = pygame.display.set_mode((WIDTH_TELA, HEIGTH_TELA))
 
     def uptade(self):
         self.all_sprites.update()
