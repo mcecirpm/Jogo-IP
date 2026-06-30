@@ -86,6 +86,8 @@ class Game:
                     Iara(self, value, pos) #criação da iara
                 elif column == "K":
                     Chave_temporaria(self, value, pos) #criação da chave
+                elif column == "A":
+                    ColetavelChave(self, value, pos)
 
     def troca_sala(self, novo_layout):
         # Limpar as paredes, blocos, buracos atuais e portas abertas

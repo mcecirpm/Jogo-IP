@@ -156,6 +156,7 @@ class HUD:
         contadores_fixos = [
             ('V', RED, inventario.contagem_vida),
             ('T', YELLOW, inventario.contagem_tempo),
+            ('K', (255, 20, 147), inventario.contagem_chave),
         ]
 
         for letra, cor_icone, quantidade in contadores_fixos:

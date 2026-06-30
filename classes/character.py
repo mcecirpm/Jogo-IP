@@ -241,16 +241,16 @@ class Player(pygame.sprite.Sprite):
 
         for hit in hits:
             if hit.tipo == 'vida':
-                # Ganha mais vida
                 self.hp = min(self.status['hp_max'], self.hp + 10)
                 self.inventario.registrar_vida()
             elif hit.tipo == 'tempo':
-                self.tempo += 15  # Ganha 15 segundos extras para a partida
+                self.tempo += 15
                 self.inventario.registrar_tempo()
+            elif hit.tipo == 'chave':                        # <- adiciona antes do passivo
+                self.inventario.contagem_chave += 1
             elif hit.tipo == 'passivo':
                 self.inventario.adicionar_item_passivo(
                     hit.nome_item, hit.dados_item)
-
                 if "fragmento" in hit.nome_item.lower():
                     self.inventario.adicionar_chave(hit.nome_item)
 
@@ -328,6 +328,7 @@ class Inventario:
         self.coisas = []  # Armazena os dicionários dos itens coletados
         self.contagem_vida = 0
         self.contagem_tempo = 0
+        self.contagem_chave = 0
 
     def adicionar_item_passivo(self, nome_item, dados_item):
         item = {"nome": nome_item, "tipo": "passivo"}

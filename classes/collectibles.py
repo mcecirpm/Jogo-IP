@@ -5,33 +5,27 @@ import os
 from classes.config import *
 
 
-class ColetavelChave:
-    def __init__(self, game):
+class ColetavelChave(pygame.sprite.Sprite):
+    def __init__(self, game, x, y):
         self.game = game
         self._layer = PICKUP_LAYER
         self.group = self.game.all_sprites, self.game.pickup
 
-        caminho_sprite = os.path.join(os.path.dirname(
-            __file__), '..', 'assetes', 'sprites', 'tileset_mapa.png')
+        pygame.sprite.Sprite.__init__(self, self.group)
 
-        try:
-            self.spritesheet = pygame.image.load(
-                caminho_sprite).convert_alpha()
-        except pygame.error:
-            self.spritesheet = pygame.Surface((128, 154))
-            self.spritesheet.fill((255, 0, 255))
+        self.x = x * TILESIZE
+        self.y = y * TILESIZE
+        self.width = TILESIZE
+        self.height = TILESIZE
 
-        self.chave_inteiro = pygame.transform.scale(
-            self.spritesheet.subsurface(pygame.Rect(0, 0, 46, 114)))
+        self.image = pygame.Surface([self.width, self.height])
+        self.image.fill((255, 20, 147))  # Rosa  
 
-        self.fragmento1 = pygame.transform.scale(
-            self.spritesheet.subsurface(pygame.Rect(50, 0, 34, 30)))
+        self.rect = self.image.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
 
-        self.fragmento2 = pygame.transform.scale(
-            self.spritesheet.subsurface(pygame.Rect(89, 0, 39, 30)))
-
-        self.fragmento3 = pygame.transform.scale(
-            self.spritesheet.subsurface(pygame.Rect(47, 36, 35, 69)))
+        self.tipo = 'chave'
 
 
 class coletavelVida(pygame.sprite.Sprite):
