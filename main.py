@@ -96,6 +96,8 @@ class Game:
                     chave_pos = (self.sala_atual.x, self.sala_atual.y, value, pos)
                     if chave_pos not in self.chaves_coletadas:
                         ColetavelChave(self, value, pos)
+                elif column == "H":
+                    Cacador(self, value, pos)
 
     def troca_sala(self, novo_layout):
         for sprite in self.walls:

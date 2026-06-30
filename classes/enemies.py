@@ -234,8 +234,7 @@ class Poder(pygame.sprite.Sprite):
 
         # Ajeitar as distancias para ficar proporcional o quanto anda
         player = self.game.player
-        distancia = ((self.rect.centerx - player.rect.centerx) **
-                     2 + (self.rect.centery - player.rect.centery)**2)**0.5
+        distancia = ((self.rect.centerx - player.rect.centerx) **2 + (self.rect.centery - player.rect.centery)**2)**0.5
         if distancia == 0:
             self.dx = 0
             self.dy = 0
@@ -293,8 +292,7 @@ class Iara(pygame.sprite.Sprite):
         player = self.game.player
 
         # Calculando a distância para ajeitar o alcance:
-        distancia = ((self.rect.centerx - player.rect.centerx) **
-                     2 + (self.rect.centery - player.rect.centery)**2)**0.5
+        distancia = ((self.rect.centerx - player.rect.centerx) **2 + (self.rect.centery - player.rect.centery)**2)**0.5
 
         # Primeiro vamos verificar se o jogador tá perto o suficiente
         if distancia < 128:  # Chutei um número qualquer para testar
@@ -320,10 +318,201 @@ class Curupira(pygame.sprite.Sprite):
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
 
-    def update(self):
+        self.hitbox = self.rect.copy()
 
+    def take_damage(self, damage):  # Só para não dar erro
+        pass
+
+    def update(self):
         # saber se o jogador encostou no curupira
         if self.rect.colliderect(self.game.player.rect):
             # aplica o efeito de atordoamento no jogador
             self.game.player.aplicar_atordoamento()
             self.kill()  # o curupira desaparece apos aplicar o efeito
+
+class Poder_curupira(pygame.sprite.Sprite): #Classe para os projéteis do inimigo final, inspiradas no curupira
+    def __init__(self, game, x, y):
+
+        self.game = game
+
+        # Ajeitar a imagem do ataque
+        self._layer = PROJ_LAYER
+        self.group = self.game.all_sprites
+
+        pygame.sprite.Sprite.__init__(self, self.group)
+
+        self.image = pygame.Surface((16, 16))
+        self.image.fill((0, 180, 0))
+
+        self.rect = self.image.get_rect()
+        self.rect.centerx = x
+        self.rect.centery = y
+
+        # Ajeitar as distancias para ficar proporcional o quanto anda
+        player = self.game.player
+        distancia = ((self.rect.centerx - player.rect.centerx) **2 + (self.rect.centery - player.rect.centery)**2)**0.5
+        if distancia == 0:
+            self.dx = 0
+            self.dy = 0
+        else:
+            self.dx = (player.rect.centerx - self.rect.centerx)/distancia
+            self.dy = (player.rect.centery - self.rect.centery)/distancia
+
+        # Uma velocidade qualquer, podemos mudar depois qualquer coisa
+        self.speed = 10
+
+    def update(self):
+        # Ele anda um pouco dependendo da velocidade
+        self.rect.centerx += self.dx * self.speed
+        self.rect.centery += self.dy * self.speed
+
+        # Verifica se houve colisão ou com o jogador ou com a parede (para desaparecer)
+        if self.rect.colliderect(self.game.player.rect):
+            # Aplica o atordoamento do curupira
+            self.game.player.aplicar_atordoamento()
+            self.kill()
+
+        if pygame.sprite.spritecollide(self, self.game.walls, False):
+            self.kill()
+
+class Cacador(pygame.sprite.Sprite):
+    def __init__(self, game, x, y):
+
+        self.game = game
+
+        self._layer = PLAYER_LAYER
+        self.group = self.game.all_sprites, self.game.enemies
+
+        pygame.sprite.Sprite.__init__(self, self.group)
+
+        self.x = x * TILESIZE  
+        self.y = y * TILESIZE 
+
+        #Colocando a aparencia dele como um quadrado vermelho
+        self.image = pygame.Surface((TILESIZE, TILESIZE))
+        self.image.fill((255, 0, 0))
+
+        self.rect = self.image.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
+
+        
+        self.hitbox = self.rect.copy()
+        self.speed = 2
+        self.cooldown_tiro = 0
+
+        self.hp = 27 #o caçador tem 15 de vida
+        self.invencivel_timer = 0 
+
+
+
+    def take_damage(self, damage):
+        if self.invencivel_timer == 0:
+            self.hp -= damage
+            self.invencivel_timer = 15 #fica invencivel por alguns frames
+
+            if self.hp <= 0:
+                self.game.playing = False
+                self.kill()  #Morre se a vida chegar a zero
+
+
+    def update(self):
+        if self.invencivel_timer > 0: #diminui o timer de invencinilidade se tomou dano há pouco
+            self.invencivel_timer -= 1
+
+
+        player = self.game.player
+        if player is None:
+            return
+
+        # diferença de posições entre o caçador e o jogador
+        dx = player.rect.centerx - self.rect.centerx
+        dy = player.rect.centery - self.rect.centery
+
+        distancia = math.sqrt(dx**2 + dy**2)
+
+        raio_de_visao = 180
+        distancia_minima = 45
+
+        x_distancia = 0
+        y_distancia = 0
+
+
+        if distancia <= raio_de_visao:
+            if distancia > distancia_minima:
+                if self.rect.centerx < player.rect.centerx:
+                    x_distancia += self.speed
+                elif self.rect.centerx > player.rect.centerx:
+                    x_distancia -= self.speed
+
+                if self.rect.centery < player.rect.centery:
+                    y_distancia += self.speed
+                elif self.rect.centery > player.rect.centery:
+                    y_distancia -= self.speed
+            else:
+                x_distancia = 0
+                y_distancia = 0
+
+        self.rect.x += x_distancia
+        colidiu_x = self.collide_walls('x', x_distancia)
+        self.rect.y += y_distancia
+        colidiu_y = self.collide_walls('y', y_distancia)
+
+        if colidiu_x or colidiu_y:
+            if colidiu_x and not colidiu_y:
+                self.rect.y += self.speed if dy > 0 else -self.speed
+                self.collide_walls('y', self.speed if dy > 0 else -self.speed)
+            elif colidiu_y and not colidiu_x:
+                self.rect.x += self.speed if dx > 0 else -self.speed
+                self.collide_walls('x', self.speed if dx > 0 else -self.speed)
+
+        self.hitbox = self.rect.copy()
+
+        # O caçador atira se tiver no alcance dele:
+        if self.cooldown_tiro > 0:
+            self.cooldown_tiro -= 1
+
+        if self.cooldown_tiro == 0:
+            if distancia < raio_de_visao:
+                dx_tiro = player.rect.centerx - self.rect.centerx
+                dy_tiro = player.rect.centery - self.rect.centery
+                distancia_tiro = (dx_tiro**2 + dy_tiro**2)**0.5
+
+                if distancia_tiro > 0:
+                    dx_tiro /= distancia_tiro  # normalização do vetor direção
+                    dy_tiro /= distancia_tiro
+
+                    lista_poderes = [BolaDeFogo, Poder_curupira, Poder]
+                    sorteado = random.choice(lista_poderes)
+
+                    if sorteado == BolaDeFogo:
+                        BolaDeFogo(
+                            self.game,
+                            self.rect.centerx,
+                            self.rect.centery,
+                            dx_tiro,
+                            dy_tiro
+                        )
+                    elif sorteado == Poder_curupira:
+                        Poder_curupira(self.game, self.rect.centerx, self.rect.centery)
+                    else:
+                        Poder(self.game, self.rect.centerx, self.rect.centery)
+
+                    self.cooldown_tiro = 60  # espera um tempo de +- 1 segundo
+
+    def collide_walls(self, direcao, distancia):
+        bateu_parede = pygame.sprite.spritecollide(self, self.game.walls, False)
+        if bateu_parede:
+            if direcao == 'x':
+                if distancia > 0:  # movendo para a direita
+                    self.rect.x = bateu_parede[0].rect.left - self.rect.width
+                if distancia < 0:  # movendo para a esquerda
+                    self.rect.x = bateu_parede[0].rect.right
+            if direcao == 'y':
+                if distancia > 0:  # movendo para baixo
+                    self.rect.y = bateu_parede[0].rect.top - self.rect.height
+                if distancia < 0:  # movendo para cima
+                    self.rect.y = bateu_parede[0].rect.bottom
+
+            return True
+        return False
