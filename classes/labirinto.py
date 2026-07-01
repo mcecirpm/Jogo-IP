@@ -167,23 +167,28 @@ class MapGenerator:
         return self.map, start_room
 
 class Wall(pygame.sprite.Sprite):
-    def __init__(self, game, x, y):
+    # Carrega a imagem uma única vez para todos os tiles 
+    _imagem_tileset = None
 
+    def __init__(self, game, x, y):
         self.game = game
         self._layer = PLAYER_LAYER
         self.groups = (self.game.all_sprites, self.game.walls)
-
         pygame.sprite.Sprite.__init__(self, self.groups)
 
         self.x = x * TILESIZE
         self.y = y * TILESIZE
-
         self.width = TILESIZE
         self.height = TILESIZE
 
-        self.image = pygame.Surface([self.width, self.height])
-        # Marrom em RGB
-        self.image.fill((150, 75, 00))
+        if Wall._imagem_tileset is None:
+            diretorio_atual = os.path.dirname(__file__)
+            caminho = os.path.join(diretorio_atual, '..', 'assetes', 'sprites', 'treepacknewest.png')
+            Wall._imagem_tileset = pygame.image.load(caminho).convert_alpha()
+
+        tile = Wall._imagem_tileset.subsurface(pygame.Rect(96, 320, 64, 64))
+
+        self.image = pygame.transform.scale(tile, (TILESIZE, TILESIZE))
 
         self.rect = self.image.get_rect()
         self.rect.x = self.x
