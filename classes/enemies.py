@@ -396,7 +396,6 @@ class Cacador(pygame.sprite.Sprite):
         self.rect.x = self.x
         self.rect.y = self.y
 
-        
         self.hitbox = self.rect.copy()
         self.speed = 2
         self.cooldown_tiro = 0
@@ -404,7 +403,8 @@ class Cacador(pygame.sprite.Sprite):
         self.hp = 27 #o caçador tem 15 de vida
         self.invencivel_timer = 0 
 
-
+        self.tempo_espera = 120 #2 segundos de espera antes de começar a perseguir o jogador
+        self.ativo = False
 
     def take_damage(self, damage):
         if self.invencivel_timer == 0:
@@ -420,10 +420,17 @@ class Cacador(pygame.sprite.Sprite):
         if self.invencivel_timer > 0: #diminui o timer de invencinilidade se tomou dano há pouco
             self.invencivel_timer -= 1
 
-
         player = self.game.player
         if player is None:
             return
+        
+        # Verifica se o caçador está ativo
+        if not self.ativo:
+            if self.tempo_espera > 0:
+                self.tempo_espera -= 1
+                return  # ainda não está ativo, então não faz nada
+            else:
+                self.ativo = True  # agora o caçador está ativo e começa a perseguir o jogador
 
         # diferença de posições entre o caçador e o jogador
         dx = player.rect.centerx - self.rect.centerx
@@ -438,20 +445,16 @@ class Cacador(pygame.sprite.Sprite):
         y_distancia = 0
 
 
-        if distancia <= raio_de_visao:
-            if distancia > distancia_minima:
-                if self.rect.centerx < player.rect.centerx:
-                    x_distancia += self.speed
-                elif self.rect.centerx > player.rect.centerx:
-                    x_distancia -= self.speed
+        if distancia > distancia_minima:
+            if self.rect.centerx < player.rect.centerx:
+                x_distancia += self.speed
+            elif self.rect.centerx > player.rect.centerx:
+                x_distancia -= self.speed
 
-                if self.rect.centery < player.rect.centery:
-                    y_distancia += self.speed
-                elif self.rect.centery > player.rect.centery:
-                    y_distancia -= self.speed
-            else:
-                x_distancia = 0
-                y_distancia = 0
+            if self.rect.centery < player.rect.centery:
+                y_distancia += self.speed
+            elif self.rect.centery > player.rect.centery:
+                y_distancia -= self.speed
 
         self.rect.x += x_distancia
         colidiu_x = self.collide_walls('x', x_distancia)

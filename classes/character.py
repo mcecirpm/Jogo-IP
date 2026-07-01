@@ -45,7 +45,7 @@ class Player(pygame.sprite.Sprite):
         self.hp = self.hp_max
         self.vida_extra = self.status['vida_extra']
 
-        self.tempo = 300  # 5 minutos em segundos
+        self.tempo = 180  # 5 minutos em segundos
 
         # Efeito do Curupira
         self.velocidade_multiplicador = 1
