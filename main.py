@@ -7,7 +7,7 @@ import os
 
 from random import choices
 from classes.config import *
-from classes.labirinto import MapGenerator, salas, Wall, Block, Door
+from classes.labirinto import MapGenerator, salas, Wall, Door
 from classes.character import *
 from classes.enemies import *
 from classes.collectibles import *
@@ -37,29 +37,6 @@ class Game:
         with open(caminho_json, 'r', encoding='utf-8') as f:
             self.banco_dados = json.load(f)
 
-    # Método de sorteio
-    def sortear_item(self, tipo_sala):
-        itens_validos = []
-        pesos = []
-
-        for nome, dados in self.banco_dados.items():
-            pool = dados.get("pool", "")
-            qualidade = dados.get("qualidade", 1)
-
-            if 'Fragmento' in nome:
-                continue
-
-            if tipo_sala in pool or 'tesouro - chefe' in pool:
-                itens_validos((nome, dados))
-
-            peso = 1.0 / max(qualidade, 0.1)
-            pesos.append(peso)
-
-        if not itens_validos:
-            return None
-
-        item_escolhido = choices(itens_validos, weights=pesos, k=1)
-        return item_escolhido
 
     def createRoom(self, layout):
         # Primeiro para pegar a string que compõe o mapa
@@ -72,8 +49,6 @@ class Game:
                     if not hasattr(self, 'player') or self.player is None:
                         self.player = Player(
                             self, value, pos, self.player_status, False)
-                elif column == "B":
-                    Block(self, value, pos)
 
                 elif column in ['N', 'S', 'E', 'O']:
                     Door(self, value, pos, column)
@@ -89,9 +64,6 @@ class Game:
                     Curupira(self, value, pos)
                 elif column == "I":
                     Iara(self, value, pos)
-                elif column == "K":
-                    if self.primeira_visita:
-                        Chave_temporaria(self, value, pos)
                 elif column == "A":
                     chave_pos = (self.sala_atual.x, self.sala_atual.y, value, pos)
                     if chave_pos not in self.chaves_coletadas:
@@ -158,7 +130,7 @@ class Game:
 
         self.aviso_porta_timer = 0
 
-        # Define quantas salas quer no andar
+        # Gerar as salas
         gerador = MapGenerator()
         self.map, self.sala_atual = gerador.generate(salas)
 
@@ -322,7 +294,7 @@ class Game:
             pygame.display.update()
             self.clock.tick(FPS)
     def check_door_collisions(self):
-        # O 'False' significa que a porta NÃO será deletada ao ser tocada
+        # O false é para a porta não ser deletada quando a colisão ocorrer
         hits = pygame.sprite.spritecollide(self.player, self.doors, False)
 
         if hits and not self.espera_porta > 0:

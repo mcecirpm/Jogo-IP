@@ -1,12 +1,12 @@
 import math
 import pygame
-import os
 
 from classes.config import *
 from collections import Counter
 
 
 class HUD:
+
     def __init__(self, game):
         self.game = game
         self.fonte_tempo = pygame.font.SysFont('Arial', 26, bold=True)
@@ -15,29 +15,14 @@ class HUD:
 
         self.altura_hud = 44
         self.margem = 10
+
         self.tamanho_coracao = 22
         self.espaco_coracao = 4
-        self.vida_por_coracao = 10
+        self.vida_por_coracao = 10 
+
         self.tamanho_icone_item = 28
         self.espaco_icone_item = 4
-
-        diretorio_atual = os.path.dirname(__file__)
-        caminho_chave = os.path.join(diretorio_atual, '..', 'assetes', 'sprites', 'tileset_chave.png')
-        tileset_chave = pygame.image.load(caminho_chave).convert_alpha()
-        tile_w = tileset_chave.get_width() // 3
-        tile_h = tileset_chave.get_height()
-        chave_recortada = tileset_chave.subsurface(pygame.Rect(0, 0, tile_w, tile_h))
-        self.icone_chave = pygame.transform.scale(chave_recortada, (self.tamanho_icone_item, self.tamanho_icone_item))
         
-        caminho_coracao = os.path.join(diretorio_atual, '..', 'assetes', 'sprites', 'coracao.png')
-        coracao_img = pygame.image.load(caminho_coracao).convert_alpha()
-        self.icone_vida = pygame.transform.scale(coracao_img, (self.tamanho_icone_item, self.tamanho_icone_item))
-        
-        caminho_relogio = os.path.join(diretorio_atual, '..', 'assetes', 'sprites', 'relogio.png')
-        relogio_img = pygame.image.load(caminho_relogio).convert_alpha()
-        recorte_relogio = relogio_img.subsurface(pygame.Rect(150, 150, 850, 850))
-        self.icone_tempo = pygame.transform.scale(recorte_relogio, (self.tamanho_icone_item, self.tamanho_icone_item))
-
     def draw(self, screen):
         player = self.game.player
         if player is None:
@@ -145,28 +130,7 @@ class HUD:
         x_direita = WIDTH_TELA - self.margem
         y = self.margem
 
-        tem_chave = inventario.busca_chave()
-        fragmentos = inventario.contar_fragmentos()
-
-        if tem_chave:
-            texto, cor = "Chave completa!", GOLD
-        elif fragmentos > 0:
-            texto, cor = f"Fragmentos: {fragmentos}/3", GRAY
-        else:
-            texto, cor = None, None
-
-        if texto:
-            texto_render = self.fonte_pequena.render(texto, True, cor)
-            rect_texto = texto_render.get_rect(topright=(x_direita, y))
-            screen.blit(texto_render, rect_texto)
-
-        itens_passivos = [
-            item for item in inventario.coisas if item.get('tipo') == 'passivo'
-        ]
-
-        contagem_itens = Counter(item.get('nome', '?') for item in itens_passivos)
-
-        y_icones = self.margem + (self.fonte_pequena.get_height() if texto else 0) + 4
+        y_icones = self.margem  + 4
         x_icone = x_direita
 
         contadores_fixos = [
@@ -187,18 +151,6 @@ class HUD:
                 x_icone, y_icones, self.tamanho_icone_item, self.tamanho_icone_item
             )
             self._desenhar_icone_fixo(screen, rect_icone, letra, cor_icone, quantidade)
-
-        for nome, quantidade in reversed(list(contagem_itens.items())):
-            x_icone -= self.tamanho_icone_item + self.espaco_icone_item
-
-            if x_icone < self.margem:
-                break
-
-            rect_icone = pygame.Rect(
-                x_icone, y_icones, self.tamanho_icone_item, self.tamanho_icone_item
-            )
-
-            self._desenhar_icone_item(screen, rect_icone, nome, quantidade)
 
     def _desenhar_icone_item(self, screen, rect_icone, nome, quantidade):
         pygame.draw.rect(screen, CYAN, rect_icone)
@@ -223,37 +175,25 @@ class HUD:
             screen.blit(qtd_render, qtd_rect)
             
     def _desenhar_icone_fixo(self, screen, rect_icone, letra, cor_icone, quantidade):
-        if letra == 'K' and hasattr(self, 'icone_chave'):
-            pygame.draw.rect(screen, DARK_GRAY, rect_icone)
-            pygame.draw.rect(screen, WHITE, rect_icone, 1)
-            screen.blit(self.icone_chave, rect_icone.topleft)
+        pygame.draw.rect(screen, cor_icone, rect_icone)
+        pygame.draw.rect(screen, WHITE, rect_icone, 1)
 
-        elif letra == 'V' and hasattr(self, 'icone_vida'):
-            pygame.draw.rect(screen, DARK_GRAY, rect_icone)
-            pygame.draw.rect(screen, WHITE, rect_icone, 1)
-            screen.blit(self.icone_vida, rect_icone.topleft)
-
-        elif letra == 'T' and hasattr(self, 'icone_tempo'):
-            pygame.draw.rect(screen, DARK_GRAY, rect_icone)
-            pygame.draw.rect(screen, WHITE, rect_icone, 1)
-            screen.blit(self.icone_tempo, rect_icone.topleft)
-
-        else:
-            pygame.draw.rect(screen, cor_icone, rect_icone)
-            pygame.draw.rect(screen, WHITE, rect_icone, 1)
-            letra_render = self.fonte_letra_item.render(letra, True, BLACK)
-            letra_rect = letra_render.get_rect(center=rect_icone.center)
-            screen.blit(letra_render, letra_rect)
+        letra_render = self.fonte_letra_item.render(letra, True, BLACK)
+        letra_rect = letra_render.get_rect(center=rect_icone.center)
+        screen.blit(letra_render, letra_rect)
 
         texto_qtd = str(quantidade) if quantidade < 100 else "99+"
         qtd_render = self.fonte_letra_item.render(texto_qtd, True, WHITE)
+
         raio_badge = 8
         centro_badge = (rect_icone.right - 2, rect_icone.bottom - 2)
+
         pygame.draw.circle(screen, BLACK, centro_badge, raio_badge)
         pygame.draw.circle(screen, WHITE, centro_badge, raio_badge, 1)
+
         qtd_rect = qtd_render.get_rect(center=centro_badge)
         screen.blit(qtd_render, qtd_rect)
-        
+    
     def _desenhar_aviso_porta(self, screen, player):
         if self.game.aviso_porta_timer > 0:
             self.game.aviso_porta_timer -= 1

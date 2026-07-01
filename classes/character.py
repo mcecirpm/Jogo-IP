@@ -22,8 +22,6 @@ class Player(pygame.sprite.Sprite):
         self.x_change = 0
         self.y_change = 0
 
-        self.facing = 'face_down'
-
         self.image = pygame.Surface([self.width, self.height])
         self.image.fill(GREEN) #a cor do jogador é verde
 
@@ -58,16 +56,12 @@ class Player(pygame.sprite.Sprite):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a]:
             self.x_change -= speed
-            self.facing = 'face_left'
         if keys[pygame.K_d]:
             self.x_change += speed
-            self.facing = 'face_right'
         if keys[pygame.K_w]:
             self.y_change -= speed
-            self.facing = 'face_up'
         if keys[pygame.K_s]:
             self.y_change += speed
-            self.facing = 'face_down'
 
     def attack(self):
         keys = pygame.key.get_pressed()
@@ -130,16 +124,10 @@ class Player(pygame.sprite.Sprite):
 
         self.rect.x += self.x_change
         self.collide_walls('x')
-        self.collide_blocks('x')
-        self.collide_holes('x')
-        self.collid_pedestal('x')
         self.collide_porta_bloqueada('x')  
 
         self.rect.y += self.y_change
         self.collide_walls('y')
-        self.collide_blocks('y')
-        self.collide_holes('y')
-        self.collid_pedestal('y')
         self.collide_porta_bloqueada('y')  
 
         self.x_change = 0
@@ -173,69 +161,6 @@ class Player(pygame.sprite.Sprite):
                 if self.y_change < 0:
                     self.rect.y = hits_wall[0].rect.bottom
 
-    def collide_blocks(self, direction):
-        if direction == "x":
-            hits_block = pygame.sprite.spritecollide(
-                self, self.game.blocks, False)
-
-            if hits_block:
-                if self.x_change > 0:
-                    self.rect.x = hits_block[0].rect.left - self.rect.width
-                if self.x_change < 0:
-                    self.rect.x = hits_block[0].rect.right
-
-        if direction == "y":
-            hits_block = pygame.sprite.spritecollide(
-                self, self.game.blocks, False)
-
-            if hits_block:
-                if self.y_change > 0:
-                    self.rect.y = hits_block[0].rect.top - self.rect.height
-                if self.y_change < 0:
-                    self.rect.y = hits_block[0].rect.bottom
-
-    def collide_holes(self, direction):
-        if direction == "x":
-            hits_hole = pygame.sprite.spritecollide(
-                self, self.game.holes, False)
-
-            if hits_hole:
-                if self.x_change > 0:
-                    self.rect.x = hits_hole[0].rect.left - self.rect.width
-                if self.x_change < 0:
-                    self.rect.x = hits_hole[0].rect.right
-
-        if direction == "y":
-            hits_hole = pygame.sprite.spritecollide(
-                self, self.game.holes, False)
-
-            if hits_hole:
-                if self.y_change > 0:
-                    self.rect.y = hits_hole[0].rect.top - self.rect.height
-                if self.y_change < 0:
-                    self.rect.y = hits_hole[0].rect.bottom
-
-    def collid_pedestal(self, direction):
-        if direction == "x":
-            hits_hole = pygame.sprite.spritecollide(
-                self, self.game.pedestal, False)
-
-            if hits_hole:
-                if self.x_change > 0:
-                    self.rect.x = hits_hole[0].rect.left - self.rect.width
-                if self.x_change < 0:
-                    self.rect.x = hits_hole[0].rect.right
-
-        if direction == "y":
-            hits_hole = pygame.sprite.spritecollide(
-                self, self.game.pedestal, False)
-
-            if hits_hole:
-                if self.y_change > 0:
-                    self.rect.y = hits_hole[0].rect.top - self.rect.height
-                if self.y_change < 0:
-                    self.rect.y = hits_hole[0].rect.bottom
-
     def coletar_itens(self):
         hits = pygame.sprite.spritecollide(self, self.game.pickup, True)
 
@@ -250,11 +175,6 @@ class Player(pygame.sprite.Sprite):
                 self.inventario.contagem_chave += 1
                 pos_chave = (self.game.sala_atual.x, self.game.sala_atual.y, hit.grid_x, hit.grid_y)
                 self.game.chaves_coletadas.add(pos_chave)
-            elif hit.tipo == 'passivo':
-                self.inventario.adicionar_item_passivo(
-                    hit.nome_item, hit.dados_item)
-                if "fragmento" in hit.nome_item.lower():
-                    self.inventario.adicionar_chave(hit.nome_item)
 
     def collide_porta_bloqueada(self, direction):
         from classes.labirinto import salas
@@ -280,11 +200,6 @@ class Player(pygame.sprite.Sprite):
                         self.rect.y = porta.rect.bottom
 
 
-class PlayerHead(pygame.sprite.Sprite): #deixei a classe para não dar erro, mas não está sendo usada
-    def __init__(self, game, player):
-        super().__init__
-    def update(self):
-        pass
 
 class Projectile(pygame.sprite.Sprite):
     def __init__(self, game, x, y, facing, damage, speed_proj, alcance):
@@ -329,9 +244,6 @@ class Projectile(pygame.sprite.Sprite):
         if self.distance_traveled >= self.max_distance:
             self.kill()
 
-        if pygame.sprite.spritecollide(self, self.game.blocks, False):
-            self.kill()
-
         if pygame.sprite.spritecollide(self, self.game.walls, False):
             self.kill()
 
@@ -355,18 +267,6 @@ class Inventario:
         self.contagem_tempo = 0
         self.contagem_chave = 0
 
-    def adicionar_item_passivo(self, nome_item, dados_item):
-        item = {"nome": nome_item, "tipo": "passivo"}
-        item.update(dados_item)
-        item["nome"] = nome_item     
-        item["tipo"] = "passivo"      
-        self.coisas.append(item)
-
-        if "effect" in item:
-            self._aplicar_efeito(item["effect"])
-
-        print(f"Item coletado: {nome_item} - {item.get('description_item', 'Sem descrição')}")
-
     def adicionar_chave(self, tipo_chave):
         self.coisas.append({
             "nome": f"Chave ({tipo_chave})",
@@ -378,62 +278,3 @@ class Inventario:
 
     def registrar_tempo(self):
         self.contagem_tempo += 1
-
-    def busca_chave(self):
-        """Retorna True se o jogador tiver a chave inteira."""
-        for item in self.coisas:
-            if item.get("tipo") == "chave" and item.get("subtipo") == "inteira":
-                return True
-        return False
-
-    def contar_fragmentos(self):
-        """Conta quantos fragmentos de chave diferentes o jogador possui."""
-        fragmentos = set()
-        for item in self.coisas:
-            subtipo = item.get("subtipo", "")
-            if item.get("tipo") == "chave" and "fragmento" in subtipo.lower():
-                fragmentos.add(subtipo)
-        return len(fragmentos)
-
-    def _aplicar_efeito(self, efeito):
-        # Se for uma lista de listas (múltiplos efeitos, como no damage_booster1)
-        if isinstance(efeito[0], list):
-            for sub_efeito in efeito:
-                self._aplicar_efeito(sub_efeito)
-            return
-
-        # Interpretação de modificadores numéricos: [valor, "Up"/"Down", "atributo"]
-        if len(efeito) >= 3 and efeito[1] in ["Up", "Down"]:
-            valor, operacao, atributo = efeito[0], efeito[1], efeito[2]
-            modificador = 1 if operacao == "Up" else -1
-            alteracao = valor * modificador
-
-            if atributo == "speed":
-                self.player.speed += alteracao
-            elif atributo == "damage":
-                self.player.damage += alteracao
-            elif atributo == "multi":
-                # Multiplicadores de dano costumam ser multiplicativos
-                self.player.damage_multiplier *= valor
-            elif atributo == "frequency":
-                # Frequência menor = tiros mais rápidos (reduz o cooldown base)
-                self.player.shoot_frequency = max(
-                    1, int(self.player.shoot_frequency * valor))
-            elif atributo == "range":
-                self.player.projectile_range += alteracao
-            elif atributo == "qtd_proj":
-                self.player.qtd_proj += int(alteracao)
-            elif atributo == "health" or atributo == "life":
-                self.player.max_health += int(alteracao)
-                # Verifica se cura totalmente (caso do doce_leite / churrasco)
-                if len(efeito) == 4 and efeito[3] == "full":
-                    self.player.health = self.player.max_health
-                else:
-                    self.player.health += int(alteracao)
-
-        # Interpretação de efeitos especiais ou cosméticos
-        else:
-            if efeito[0] == "homing":
-                self.player.has_homing = True
-            elif efeito[0] == "cor":
-                self.player.projectile_color = efeito[1]
