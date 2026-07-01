@@ -240,8 +240,100 @@ class Game:
         pass
 
     def menu(self):
-        pass
+        self.in_menu = True
+        
+        # Tamanho e definicao dos botoes 
+        botao_jogar = pygame.Rect(WIDTH_TELA//2 - 100, 250, 200, 60)
+        botao_como_jogar = pygame.Rect(WIDTH_TELA//2 - 100, 330, 200, 60)
+        
+        diretorio_atual = os.path.dirname(__file__)
+        caminho_fonte = os.path.join(diretorio_atual, 'assetes', 'fonts', 'PixelifySans-Regular.ttf')
+        
+        fonte_botao = pygame.font.Font(caminho_fonte, 32)
+        fonte_titulo = pygame.font.Font(caminho_fonte, 48)
+        
+        while self.in_menu and self.runnning:
+            mouse_pos = pygame.mouse.get_pos()
+            
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.in_menu = False
+                    self.runnning = False
+                
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    self.in_menu = False
+                    self.runnning = False
+                
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if botao_jogar.collidepoint(mouse_pos):
+                        self.in_menu = False
+                        self.new()
+                        self.main()
+                    
+                    if botao_como_jogar.collidepoint(mouse_pos):
+                        self.tela_como_jogar()
+            
+            self.screen.fill(BLACK)
+            
+            titulo = fonte_titulo.render("OS GUARDIÕES", True, WHITE)
+            titulo_rect = titulo.get_rect(center=(WIDTH_TELA//2, 130))
+            self.screen.blit(titulo, titulo_rect)
+            
+            cor_jogar = (100, 100, 100) if botao_jogar.collidepoint(mouse_pos) else (60, 60, 60)
+            pygame.draw.rect(self.screen, cor_jogar, botao_jogar)
+            texto_jogar = fonte_botao.render("Jogar", True, WHITE)
+            self.screen.blit(texto_jogar, texto_jogar.get_rect(center=botao_jogar.center))
+            
+            cor_como = (100, 100, 100) if botao_como_jogar.collidepoint(mouse_pos) else (60, 60, 60)
+            pygame.draw.rect(self.screen, cor_como, botao_como_jogar)
+            texto_como = fonte_botao.render("Como Jogar", True, WHITE)
+            self.screen.blit(texto_como, texto_como.get_rect(center=botao_como_jogar.center))
+            
+            pygame.display.update()
+            self.clock.tick(FPS)
 
+
+    def tela_como_jogar(self):
+        voltando = True
+        
+        diretorio_atual = os.path.dirname(__file__)
+        caminho_fonte = os.path.join(diretorio_atual, 'assetes', 'fonts', 'PixelifySans-Regular.ttf')
+        
+        fonte_texto = pygame.font.Font(caminho_fonte, 20) 
+        fonte_titulo = pygame.font.Font(caminho_fonte, 36)  
+        
+        instrucoes = [
+            "- Use WASD para se mover",
+            "- Use as setas para direcionar os projeteis",
+            "- Colete itens para fortalecer",
+            "seu personagem",
+            "- Encontre as 3 chaves para a sala final",
+            "- Derrote os inimigos para sobreviver",
+            "",
+            "Pressione ESC para voltar"
+        ]
+        
+        while voltando:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.runnning = False
+                    self.in_menu = False
+                    voltando = False
+                
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    voltando = False
+            
+            self.screen.fill(BLACK)
+            
+            titulo = fonte_titulo.render("Como Jogar", True, WHITE)
+            self.screen.blit(titulo, titulo.get_rect(center=(WIDTH_TELA//2, 80)))
+            
+            for i, linha in enumerate(instrucoes):
+                texto = fonte_texto.render(linha, True, WHITE)
+                self.screen.blit(texto, texto.get_rect(center=(WIDTH_TELA//2, 160 + i*40)))
+            
+            pygame.display.update()
+            self.clock.tick(FPS)
     def check_door_collisions(self):
         # O 'False' significa que a porta NÃO será deletada ao ser tocada
         hits = pygame.sprite.spritecollide(self.player, self.doors, False)
@@ -287,11 +379,8 @@ class Game:
 
 g = Game()
 g.intro_screen()
-g.new()
 
 while g.runnning:
-    g.main()
-    g.game_over()
     g.menu()
 
 pygame.quit()
