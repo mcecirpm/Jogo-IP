@@ -242,8 +242,8 @@ class Door(pygame.sprite.Sprite):
             self.height = 32
 
         self.image = pygame.Surface([self.width, self.height])
-        # Cinza em RGB
-        self.image.fill((139, 139, 139))
+        # Verde-musgo em RGB
+        self.image.fill((148, 0, 211))
 
         self.rect = self.image.get_rect()
 
