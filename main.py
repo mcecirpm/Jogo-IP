@@ -22,7 +22,7 @@ class Game:
             pygame.FULLSCREEN | pygame.SCALED
         )
         self.clock = pygame.time.Clock()
-        self.runnning = True
+        self.running = True
 
         self.espera_porta = 0
         # Tipo de cronômetro
@@ -147,12 +147,12 @@ class Game:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.playing = False
-                self.runnning = False
+                self.running = False
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.playing = False
-                    self.runnning = False
+                    self.running = False
 
                 if event.key == pygame.K_F11:
                     self.toggle_fullscreen()
@@ -162,6 +162,7 @@ class Game:
                     if self.player.tempo > 0:
                         self.player.tempo -= 1
                     else:
+                        self.motivo_game_over = "tempo_acabou"
                         self.playing = False
 
     def toggle_fullscreen(self):
@@ -173,7 +174,7 @@ class Game:
         else:
             self.screen = pygame.display.set_mode((WIDTH_TELA, HEIGTH_TELA))
 
-    def uptade(self):
+    def update(self):
         self.all_sprites.update()
 
         if self.player:
@@ -182,6 +183,11 @@ class Game:
             #Verfica se o jogador morreu, se sim, termina o jogo
             if self.player.hp <= 0:
                 self.playing = False
+
+                if self.sala_atual == salas.get((2, -2)):
+                    self.motivo_game_over = "derrotado_cacador"
+                else:
+                    self.motivo_game_over = "sem_vidas"
 
         if self.espera_porta > 0:
             self.espera_porta -= 1
@@ -198,12 +204,18 @@ class Game:
         pygame.display.update()
 
     def main(self):
+        self.motivo_game_over = None  # Inicializa a variável motivo_game_over
+
         # Loop do jogo
         while self.playing:
             self.events()
-            self.uptade()
+            self.update()
             self.draw()
-        self.runnning = False
+
+        if self.motivo_game_over:
+            self.tela_final(self.motivo_game_over)
+        else:
+            self.running = False
 
     def game_over(self):
         pass
@@ -227,16 +239,16 @@ class Game:
         botao_jogar = pygame.Rect(WIDTH_TELA//2 - 100, 330, 200, 50)
         botao_como_jogar = pygame.Rect(WIDTH_TELA//2 - 100, 395, 200, 50)
 
-        while self.in_menu and self.runnning:
+        while self.in_menu and self.running:
             mouse_pos = pygame.mouse.get_pos()
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.in_menu = False
-                    self.runnning = False
+                    self.running = False
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     self.in_menu = False
-                    self.runnning = False
+                    self.running = False
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if botao_jogar.collidepoint(mouse_pos):
                         self.in_menu = False
@@ -276,7 +288,7 @@ class Game:
         while voltando:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    self.runnning = False
+                    self.running = False
                     self.in_menu = False
                     voltando = False
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
@@ -293,6 +305,62 @@ class Game:
 
             pygame.display.update()
             self.clock.tick(FPS)
+
+    def tela_final(self, motivo):
+        em_tela_final = True
+
+        diretorio_atual = os.path.dirname(__file__)
+
+        # Dicionário relacionando cada motivo ao seu arquivo de imagem .png correspondente
+        mapa_imagens = {
+            "sem_vidas": "tela_derrota_vida.png",
+            "tempo_acabou": "tela_derrota_tempo.png",
+            "derrotado_cacador": "tela_derrota_caçador.png",
+            "vitoria": "tela_vitória.png"
+        }
+
+        nome_arquivo = mapa_imagens.get(motivo, "tela_derrota_vida.png")
+        caminho_bg = os.path.join(diretorio_atual, 'assetes', 'sprites', nome_arquivo)
+
+        bg = pygame.image.load(caminho_bg).convert()
+        bg = pygame.transform.scale(bg, (WIDTH_TELA, HEIGTH_TELA))
+
+        # Configuração dos retângulos invisíveis para detectar os cliques nos botões da arte
+        if motivo == "vitoria":
+            # Na tela de vitória, os botões ficam lado a lado: [ JOGAR DE NOVO ] e [ SAIR DO JOGO ]
+            botao_esquerda = pygame.Rect(WIDTH_TELA // 2 - 210, 480, 190, 50)
+            botao_direita = pygame.Rect(WIDTH_TELA // 2 + 20, 480, 190, 50)
+        else:
+            # Nas 3 telas de Game Over, os botões ficam empilhados: [ TENTAR NOVAMENTE ] e [ VOLTAR AO MENU ]
+            botao_esquerda = pygame.Rect(WIDTH_TELA // 2 - 120, 440, 240, 40)
+            botao_direita = pygame.Rect(WIDTH_TELA // 2 - 120, 490, 240, 40)
+
+        while em_tela_final and self.running:
+            posicao_mouse = pygame.mouse.get_pos()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    em_tela_final = False
+                    self.running = False
+                
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    em_tela_final = False
+
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:  # Clique esquerdo do mouse
+                        if botao_esquerda.collidepoint(posicao_mouse):
+                            # Botão Esquerdo (ou superior): Reinicia o jogo direto
+                            em_tela_final = False
+                            self.new()
+                            self.main()
+                        elif botao_direita.collidepoint(posicao_mouse):
+                            # Botão Direito (ou inferior): Sai do loop da tela final e volta naturalmente ao menu
+                            em_tela_final = False
+
+            self.screen.blit(bg, (0, 0))
+            pygame.display.update()
+            self.clock.tick(FPS)
+    
     def check_door_collisions(self):
         # O false é para a porta não ser deletada quando a colisão ocorrer
         hits = pygame.sprite.spritecollide(self.player, self.doors, False)
@@ -339,7 +407,7 @@ class Game:
 g = Game()
 g.intro_screen()
 
-while g.runnning:
+while g.running:
     g.menu()
 
 pygame.quit()

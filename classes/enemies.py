@@ -412,6 +412,7 @@ class Cacador(pygame.sprite.Sprite):
             self.invencivel_timer = 15 #fica invencivel por alguns frames
 
             if self.hp <= 0:
+                self.game.motivo_game_over = "vitoria"
                 self.game.playing = False
                 self.kill()  #Morre se a vida chegar a zero
 
