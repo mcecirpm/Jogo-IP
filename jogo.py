@@ -228,7 +228,7 @@ class Game:
 
         diretorio_atual = os.path.dirname(__file__)
         caminho_fonte = os.path.join(
-            diretorio_atual, 'assetes', 'fonts', 'PixelifySans-Regular.ttf')
+            diretorio_atual, 'assetes', 'fontes', 'PixelifySans-Regular.ttf')
         caminho_bg = os.path.join(
             diretorio_atual, 'assetes', 'sprites', 'menu_bg.png')
 
@@ -269,7 +269,7 @@ class Game:
 
         diretorio_atual = os.path.dirname(__file__)
         caminho_fonte = os.path.join(
-            diretorio_atual, 'assetes', 'fonts', 'PixelifySans-Regular.ttf')
+            diretorio_atual, 'assetes', 'fontes', 'PixelifySans-Regular.ttf')
         caminho_bg = os.path.join(
             diretorio_atual, 'assetes', 'sprites', 'como_jogar_bg.png')
 
