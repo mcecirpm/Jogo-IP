@@ -1,9 +1,11 @@
 import pygame
+import os
 
 from classes.config import *
 
 
 class Player(pygame.sprite.Sprite):
+    _imagem = None
     def __init__(self, game, x, y, status, homming):
 
         self.game = game
@@ -22,8 +24,12 @@ class Player(pygame.sprite.Sprite):
         self.x_change = 0
         self.y_change = 0
 
-        self.image = pygame.Surface([self.width, self.height])
-        self.image.fill(GREEN)  # a cor do jogador é verde
+        if Player._imagem is None: 
+            diretorio_atual = os.path.dirname(__file__) 
+            caminho = os.path.join(diretorio_atual, '..', 'assetes', 'sprites', 'jogador_alternativo_sem_fundo.png') 
+            Player._imagem = pygame.image.load(caminho).convert_alpha()
+            
+        self.image = pygame.transform.scale(Player._imagem, (TILESIZE, TILESIZE))
 
         self.rect = self.image.get_rect()
         self.rect.x = self.x
