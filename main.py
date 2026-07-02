@@ -327,13 +327,15 @@ class Game:
 
         # Configuração dos retângulos invisíveis para detectar os cliques nos botões da arte
         if motivo == "vitoria":
-            # Na tela de vitória, os botões ficam lado a lado: [ JOGAR DE NOVO ] e [ SAIR DO JOGO ]
-            botao_esquerda = pygame.Rect(WIDTH_TELA // 2 - 210, 480, 190, 50)
-            botao_direita = pygame.Rect(WIDTH_TELA // 2 + 20, 480, 190, 50)
+            botao_esquerda = pygame.Rect(85, 395, 220, 50)
+            botao_direita = pygame.Rect(365, 395, 220, 50)
+        elif motivo == "tempo_acabou":
+            botao_esquerda = pygame.Rect(210, 255, 250, 42)
+            botao_direita = pygame.Rect(210, 305, 250, 42)
         else:
-            # Nas 3 telas de Game Over, os botões ficam empilhados: [ TENTAR NOVAMENTE ] e [ VOLTAR AO MENU ]
-            botao_esquerda = pygame.Rect(WIDTH_TELA // 2 - 120, 440, 240, 40)
-            botao_direita = pygame.Rect(WIDTH_TELA // 2 - 120, 490, 240, 40)
+            botao_esquerda = pygame.Rect(205, 380, 260, 45)
+            botao_direita = pygame.Rect(205, 425, 260, 40)
+
 
         while em_tela_final and self.running:
             posicao_mouse = pygame.mouse.get_pos()
