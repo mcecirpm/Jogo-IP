@@ -23,7 +23,7 @@ class Player(pygame.sprite.Sprite):
         self.y_change = 0
 
         self.image = pygame.Surface([self.width, self.height])
-        self.image.fill(GREEN) #a cor do jogador é verde
+        self.image.fill(GREEN)  # a cor do jogador é verde
 
         self.rect = self.image.get_rect()
         self.rect.x = self.x
@@ -51,7 +51,8 @@ class Player(pygame.sprite.Sprite):
         self.tempo_atordoado = 0
 
     def moviment(self):
-        speed = self.status['speed'] * 4 * self.velocidade_multiplicador #a velocidade do jogador é multiplicada pelo efeito do Curupira, que deixa o jogador mais lento
+        # a velocidade do jogador é multiplicada pelo efeito do Curupira, que deixa o jogador mais lento
+        speed = self.status['speed'] * 4 * self.velocidade_multiplicador
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a]:
@@ -66,7 +67,7 @@ class Player(pygame.sprite.Sprite):
     def attack(self):
         keys = pygame.key.get_pressed()
 
-        if self.shoot_cooldown == 0: 
+        if self.shoot_cooldown == 0:
             hx = self.rect.centerx
             hy = self.rect.centery
             shoot = False
@@ -124,21 +125,22 @@ class Player(pygame.sprite.Sprite):
 
         self.rect.x += self.x_change
         self.collide_walls('x')
-        self.collide_porta_bloqueada('x')  
+        self.collide_porta_bloqueada('x')
 
         self.rect.y += self.y_change
         self.collide_walls('y')
-        self.collide_porta_bloqueada('y')  
+        self.collide_porta_bloqueada('y')
 
         self.x_change = 0
         self.y_change = 0
 
     def aplicar_atordoamento(self):
-        if self.atordoado: # se o jogador já estiver atordoado, não aplica o efeito novamente
+        if self.atordoado:  # se o jogador já estiver atordoado, não aplica o efeito novamente
             return
-        self.atordoado = True #jogador atordoado
-        self.velocidade_multiplicador = 0.5 # deixa a velocidade do jogador pela metade
-        self.tempo_atordoado = FPS * 5 #o jogador fica atordoado por 5 segundos, depois volta a velocidade normal
+        self.atordoado = True  # jogador atordoado
+        self.velocidade_multiplicador = 0.5  # deixa a velocidade do jogador pela metade
+        # o jogador fica atordoado por 5 segundos, depois volta a velocidade normal
+        self.tempo_atordoado = FPS * 5
 
     def collide_walls(self, direction):
         if direction == "x":
@@ -173,7 +175,8 @@ class Player(pygame.sprite.Sprite):
                 self.inventario.registrar_tempo()
             elif hit.tipo == 'chave':
                 self.inventario.contagem_chave += 1
-                pos_chave = (self.game.sala_atual.x, self.game.sala_atual.y, hit.grid_x, hit.grid_y)
+                pos_chave = (self.game.sala_atual.x,
+                             self.game.sala_atual.y, hit.grid_x, hit.grid_y)
                 self.game.chaves_coletadas.add(pos_chave)
 
     def collide_porta_bloqueada(self, direction):
@@ -198,7 +201,6 @@ class Player(pygame.sprite.Sprite):
                         self.rect.y = porta.rect.top - self.rect.height
                     elif self.y_change < 0:
                         self.rect.y = porta.rect.bottom
-
 
 
 class Projectile(pygame.sprite.Sprite):
@@ -251,13 +253,14 @@ class Projectile(pygame.sprite.Sprite):
             self.kill()
 
         hits_enemy = pygame.sprite.spritecollide(
-            self, self.game.enemies, False)
+            self, self.game.guardioes, False)
 
         for hit in hits_enemy:
             if self.rect.colliderect(hit.hitbox):
                 hit.take_damage(self.damage)
                 self.kill()
                 break
+
 
 class Inventario:
     def __init__(self, player):
@@ -273,6 +276,7 @@ class Inventario:
             "tipo": "chave",
             "subtipo": tipo_chave
         })
+
     def registrar_vida(self):
         self.contagem_vida += 1
 

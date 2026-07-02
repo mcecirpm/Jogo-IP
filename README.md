@@ -100,7 +100,7 @@ pip install pygame
 ```
 3. Execute o jogo:
  ```bash
-python main.py
+python jogo.py
 ```
 
 ---

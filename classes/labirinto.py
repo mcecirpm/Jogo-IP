@@ -3,10 +3,10 @@ import random
 import os
 
 from classes.config import *
-from classes.collectibles import *
+from classes.coletaveis import *
 
 
-#Dicionário das salas:
+# Dicionário das salas:
 salas_layout = {
     (0, 0): [
         "WWWWWWWWWWNWWWWWWWWWW",
@@ -42,7 +42,7 @@ salas_layout = {
         "WWW.WWWWW.WWW..WWWW.W",
         "W.......W......V...WW",
         "WWWWWWWWWWSWWWWWWWWWW"
- ],
+    ],
 
     (0, -2): [
         "WWWWWWWWWWWWWWWWWWWWW",
@@ -100,24 +100,26 @@ salas_layout = {
     ]
 }
 
+
 class RoomNode:
     def __init__(self, x, y, layout):
         self.x = x
         self.y = y
-        self.vizinho = {'N' : None, 'S' : None, 'E' : None, 'O' : None}
+        self.vizinho = {'N': None, 'S': None, 'E': None, 'O': None}
         self.layout = layout
         self.foi_visitada = False
 
-#Colocar cada sala do dicionário em um roomnode:
-sala_inicial = RoomNode(0,0,salas_layout[(0,0)])
-sala_labirinto1 = RoomNode(0,-1,salas_layout[(0,-1)])
-sala_labirinto2 = RoomNode(0,-2,salas_layout[(0,-2)])
-sala_labirinto3 = RoomNode(1,-2,salas_layout[(1,-2)])
-sala_final = RoomNode(2,-2,salas_layout[(2,-2)])
 
-#Dicionário para guardar os roomnodes:
-salas = {(0,0) : sala_inicial, (0,-1) : sala_labirinto1, (0, -2) : sala_labirinto2, (1,-2) : sala_labirinto3, (2,-2) : sala_final}
-        
+# Colocar cada sala do dicionário em um roomnode:
+sala_inicial = RoomNode(0, 0, salas_layout[(0, 0)])
+sala_labirinto1 = RoomNode(0, -1, salas_layout[(0, -1)])
+sala_labirinto2 = RoomNode(0, -2, salas_layout[(0, -2)])
+sala_labirinto3 = RoomNode(1, -2, salas_layout[(1, -2)])
+sala_final = RoomNode(2, -2, salas_layout[(2, -2)])
+
+# Dicionário para guardar os roomnodes:
+salas = {(0, 0): sala_inicial, (0, -1): sala_labirinto1, (0, -2): sala_labirinto2, (1, -2): sala_labirinto3, (2, -2): sala_final}
+
 
 class MapGenerator:
     def __init__(self):
@@ -125,50 +127,50 @@ class MapGenerator:
         self.map = []
 
     def generate(self, salas):
-        #Primeira sala, vai ser a já definida:
-        start_room = salas[(0,0)]
+        # Primeira sala, vai ser a já definida:
+        start_room = salas[(0, 0)]
         self.grid[(0, 0)] = start_room
         sala_anterior = (0, 0)
-        self.map.append(self.grid[(0,0)])
-      
+        self.map.append(self.grid[(0, 0)])
 
         for chave in salas:
-            if chave != (0,0):
+            if chave != (0, 0):
                 nova_sala = salas[chave]
                 self.grid[chave] = nova_sala
 
-                #procurar direção do vizinho:
+                # procurar direção do vizinho:
                 x = int(chave[0]) - int(sala_anterior[0])
                 y = int(chave[1]) - int(sala_anterior[1])
 
-                if(x != 0):
-                    if(x == -1):
+                if (x != 0):
+                    if (x == -1):
                         vizinho_novo = 'E'
                         vizinho_anterior = 'O'
                     else:
                         vizinho_novo = 'O'
                         vizinho_anterior = 'E'
                 else:
-                    if(y == -1):
+                    if (y == -1):
                         vizinho_novo = 'S'
                         vizinho_anterior = 'N'
                     else:
                         vizinho_novo = 'N'
                         vizinho_anterior = 'S'
-                    
-                #Atualizar os vizinhos
+
+                # Atualizar os vizinhos
                 self.grid[sala_anterior].vizinho[vizinho_anterior] = nova_sala
                 nova_sala.vizinho[vizinho_novo] = self.grid[sala_anterior]
 
-                #Guardar a sala anterior
+                # Guardar a sala anterior
                 sala_anterior = chave
 
                 self.map.append(self.grid[chave])
 
         return self.map, start_room
 
+
 class Wall(pygame.sprite.Sprite):
-    # Carrega a imagem uma única vez para todos os tiles 
+    # Carrega a imagem uma única vez para todos os tiles
     _imagem_tileset = None
 
     def __init__(self, game, x, y):
@@ -184,7 +186,8 @@ class Wall(pygame.sprite.Sprite):
 
         if Wall._imagem_tileset is None:
             diretorio_atual = os.path.dirname(__file__)
-            caminho = os.path.join(diretorio_atual, '..', 'assetes', 'sprites', 'treepacknewest.png')
+            caminho = os.path.join(diretorio_atual, '..',
+                                   'assetes', 'sprites', 'treepacknewest.png')
             Wall._imagem_tileset = pygame.image.load(caminho).convert_alpha()
 
         tile = Wall._imagem_tileset.subsurface(pygame.Rect(96, 320, 64, 64))
@@ -234,4 +237,3 @@ class Door(pygame.sprite.Sprite):
 
         elif self.direcao == 'S':
             self.rect.midbottom = (self.x + TILESIZE // 2, self.y + TILESIZE)
-

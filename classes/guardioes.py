@@ -1,7 +1,7 @@
 import pygame
 import random
 import math
-import json
+import os
 
 from classes.config import *
 
@@ -36,7 +36,8 @@ class BolaDeFogo(pygame.sprite.Sprite):  # classe para os projeteis da mula sem 
         self.rect.y += self.dy * self.speed
 
         if self.rect.colliderect(self.game.player.rect):
-            self.game.player.hp = max(0, self.game.player.hp - 3)  # dá dano ao jogador
+            self.game.player.hp = max(
+                0, self.game.player.hp - 3)  # dá dano ao jogador
             self.kill()  # destrói o projétil ao colidir com o jogador
 
         if pygame.sprite.spritecollide(self, self.game.walls, False):
@@ -51,16 +52,16 @@ class MulaSemCabeca(pygame.sprite.Sprite):  # classe para a mula sem cabeça
         self.game = game
 
         self._layer = PLAYER_LAYER
-        self.group = self.game.all_sprites, self.game.enemies
+        self.group = self.game.all_sprites, self.game.guardioes
 
         pygame.sprite.Sprite.__init__(self, self.group)
 
         self.x = x * TILESIZE
         self.y = y * TILESIZE
 
-        # aparencia do quadrado laranja representando a mula sem cabeça
-        self.image = pygame.Surface((TILESIZE, TILESIZE))
-        self.image.fill((255, 100, 0))
+        sprite = pygame.image.load(os.path.join(
+            "assetes", "sprites", "mula-sem-cabeca.png")).convert_alpha()
+        self.image = pygame.transform.scale(sprite, (TILESIZE, TILESIZE))
 
         self.rect = self.image.get_rect()
         self.rect.x = self.x
@@ -74,16 +75,17 @@ class MulaSemCabeca(pygame.sprite.Sprite):  # classe para a mula sem cabeça
         self.speed = 2
         self.cooldown_tiro = 0
 
-        self.hp = 9 # a mula tem 9 vidas
-        self.invencivel_timer = 0 # p ñ morrer com 1 clique
+        self.hp = 9  # a mula tem 9 vidas
+        self.invencivel_timer = 0  # p ñ morrer com 1 clique
 
-        self.perseguindo = False # flag para saber se a mula sem cabeça está perseguindo o jogador
+        # flag para saber se a mula sem cabeça está perseguindo o jogador
+        self.perseguindo = False
 
     # a mula sem cabeça não recebe dano, então esse método é só um placeholder para evitar erros caso o jogador tente atacar ela
     def take_damage(self, damage):
         if self.invencivel_timer == 0:
             self.hp -= damage
-            self.invencivel_timer = 15 #fica invencivel por alguns frames
+            self.invencivel_timer = 15  # fica invencivel por alguns frames
 
             if self.hp <= 0:
                 self.kill()  # a mula sem cabeça morre se a vida chegar a zero
@@ -92,34 +94,37 @@ class MulaSemCabeca(pygame.sprite.Sprite):  # classe para a mula sem cabeça
         mula_centro = self.rect.center
         jogador_centro = player.rect.center
 
-        tolerancia = TILESIZE // 2  # tolerância para considerar que a linha de visão está limpa
+        # tolerância para considerar que a linha de visão está limpa
+        tolerancia = TILESIZE // 2
 
         no_mesmo_eixo_x = abs(mula_centro[1] - jogador_centro[1]) < tolerancia
         no_mesmo_eixo_y = abs(mula_centro[0] - jogador_centro[0]) < tolerancia
 
         if not no_mesmo_eixo_x and not no_mesmo_eixo_y:
             return False
-        
+
         if no_mesmo_eixo_x:
             x1 = min(mula_centro[0], jogador_centro[0])
             x2 = max(mula_centro[0], jogador_centro[0])
-            raio_de_visao_rect = pygame.Rect(x1, mula_centro[1] - 2, x2 - x1, 4)  # cria um retângulo horizontal de 4 pixels de altura
+            # cria um retângulo horizontal de 4 pixels de altura
+            raio_de_visao_rect = pygame.Rect(
+                x1, mula_centro[1] - 2, x2 - x1, 4)
         else:
             y1 = min(mula_centro[1], jogador_centro[1])
             y2 = max(mula_centro[1], jogador_centro[1])
-            raio_de_visao_rect = pygame.Rect(mula_centro[0] - 2, y1, 4, y2 - y1)  # cria um retângulo vertical de 4 pixels de largura
+            # cria um retângulo vertical de 4 pixels de largura
+            raio_de_visao_rect = pygame.Rect(
+                mula_centro[0] - 2, y1, 4, y2 - y1)
 
-        for parede in self.game.walls: # verifica se há alguma parede entre a mula sem cabeça e o jogador
+        for parede in self.game.walls:  # verifica se há alguma parede entre a mula sem cabeça e o jogador
             if raio_de_visao_rect.colliderect(parede.rect):
                 return False  # há uma parede entre a mula sem cabeça e o jogador
 
         return True  # a visão está limpa
 
     def update(self):
-        if self.invencivel_timer > 0: #diminui o timer de invencinilidade se tomou dano há pouco
+        if self.invencivel_timer > 0:  # diminui o timer de invencinilidade se tomou dano há pouco
             self.invencivel_timer -= 1
-            if self.invencivel_timer == 0:
-                self.image.fill((255, 100, 0))  # volta a cor original da mula sem cabeça
 
         player = self.game.player
         if player is None:
@@ -131,7 +136,7 @@ class MulaSemCabeca(pygame.sprite.Sprite):  # classe para a mula sem cabeça
 
         distancia = math.sqrt(dx**2 + dy**2)
 
-        raio_de_visao = 180 # raio de visão da mula sem cabeça em 180 pixels
+        raio_de_visao = 180  # raio de visão da mula sem cabeça em 180 pixels
         distancia_minima = 45
 
         x_distancia = 0
@@ -196,7 +201,8 @@ class MulaSemCabeca(pygame.sprite.Sprite):  # classe para a mula sem cabeça
                     self.cooldown_tiro = 120  # espera um tempo de +- 2 segundos antes de atirar novamente, limitando a quantidade de projéteis na tela e dando uma chance para o jogador se esquivar
 
     def collide_walls(self, direcao, distancia):
-        bateu_parede = pygame.sprite.spritecollide(self, self.game.walls, False)
+        bateu_parede = pygame.sprite.spritecollide(
+            self, self.game.walls, False)
         if bateu_parede:
             if direcao == 'x':
                 if distancia > 0:  # movendo para a direita
@@ -213,6 +219,8 @@ class MulaSemCabeca(pygame.sprite.Sprite):  # classe para a mula sem cabeça
         return False
 
 # Criando a Iara:
+
+
 class Poder(pygame.sprite.Sprite):
 
     def __init__(self, game, x, y):
@@ -234,7 +242,8 @@ class Poder(pygame.sprite.Sprite):
 
         # Ajeitar as distancias para ficar proporcional o quanto anda
         player = self.game.player
-        distancia = ((self.rect.centerx - player.rect.centerx) **2 + (self.rect.centery - player.rect.centery)**2)**0.5
+        distancia = ((self.rect.centerx - player.rect.centerx) **
+                     2 + (self.rect.centery - player.rect.centery)**2)**0.5
         if distancia == 0:
             self.dx = 0
             self.dy = 0
@@ -260,6 +269,7 @@ class Poder(pygame.sprite.Sprite):
         if pygame.sprite.spritecollide(self, self.game.walls, False):
             self.kill()
 
+
 class Iara(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
         self.game = game
@@ -269,12 +279,13 @@ class Iara(pygame.sprite.Sprite):
         self.y = y*TILESIZE
 
         self._layer = PLAYER_LAYER
-        self.group = self.game.all_sprites, self.game.enemies
+        self.group = self.game.all_sprites, self.game.guardioes
 
         pygame.sprite.Sprite.__init__(self, self.group)
 
-        self.image = pygame.Surface((TILESIZE, TILESIZE))
-        self.image.fill((0, 0, 255))
+        sprite = pygame.image.load(os.path.join(
+            "assetes", "sprites", "Iara.png")).convert_alpha()
+        self.image = pygame.transform.scale(sprite, (TILESIZE, TILESIZE))
 
         self.rect = self.image.get_rect()
         self.rect.centerx = self.x + TILESIZE // 2
@@ -292,7 +303,8 @@ class Iara(pygame.sprite.Sprite):
         player = self.game.player
 
         # Calculando a distância para ajeitar o alcance:
-        distancia = ((self.rect.centerx - player.rect.centerx) **2 + (self.rect.centery - player.rect.centery)**2)**0.5
+        distancia = ((self.rect.centerx - player.rect.centerx) **
+                     2 + (self.rect.centery - player.rect.centery)**2)**0.5
 
         # Primeiro vamos verificar se o jogador tá perto o suficiente
         if distancia < 128:  # Chutei um número qualquer para testar
@@ -308,12 +320,14 @@ class Curupira(pygame.sprite.Sprite):
 
         self.game = game
         self._layer = PLAYER_LAYER
-        self.group = self.game.all_sprites, self.game.enemies
+        self.group = self.game.all_sprites, self.game.guardioes
 
         pygame.sprite.Sprite.__init__(self, self.group)
 
-        self.image = pygame.Surface((TILESIZE, TILESIZE))
-        self.image.fill((0, 180, 0))  # quadrado verde
+        sprite = pygame.image.load(os.path.join(
+            "assetes", "sprites", "curupira.png")).convert_alpha()
+        self.image = pygame.transform.scale(sprite, (TILESIZE, TILESIZE))
+
         self.rect = self.image.get_rect()
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
@@ -330,7 +344,9 @@ class Curupira(pygame.sprite.Sprite):
             self.game.player.aplicar_atordoamento()
             self.kill()  # o curupira desaparece apos aplicar o efeito
 
-class Poder_curupira(pygame.sprite.Sprite): #Classe para os projéteis do inimigo final, inspiradas no curupira
+
+# Classe para os projéteis do inimigo final, inspiradas no curupira
+class Poder_curupira(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
 
         self.game = game
@@ -350,7 +366,8 @@ class Poder_curupira(pygame.sprite.Sprite): #Classe para os projéteis do inimig
 
         # Ajeitar as distancias para ficar proporcional o quanto anda
         player = self.game.player
-        distancia = ((self.rect.centerx - player.rect.centerx) **2 + (self.rect.centery - player.rect.centery)**2)**0.5
+        distancia = ((self.rect.centerx - player.rect.centerx) **
+                     2 + (self.rect.centery - player.rect.centery)**2)**0.5
         if distancia == 0:
             self.dx = 0
             self.dy = 0
@@ -375,22 +392,23 @@ class Poder_curupira(pygame.sprite.Sprite): #Classe para os projéteis do inimig
         if pygame.sprite.spritecollide(self, self.game.walls, False):
             self.kill()
 
+
 class Cacador(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
 
         self.game = game
 
         self._layer = PLAYER_LAYER
-        self.group = self.game.all_sprites, self.game.enemies
+        self.group = self.game.all_sprites, self.game.guardioes
 
         pygame.sprite.Sprite.__init__(self, self.group)
 
-        self.x = x * TILESIZE  
-        self.y = y * TILESIZE 
+        self.x = x * TILESIZE
+        self.y = y * TILESIZE
 
-        #Colocando a aparencia dele como um quadrado vermelho
-        self.image = pygame.Surface((TILESIZE, TILESIZE))
-        self.image.fill((255, 0, 0))
+        sprite = pygame.image.load(os.path.join(
+            "assetes", "sprites", "cacador.png")).convert_alpha()
+        self.image = pygame.transform.scale(sprite, (TILESIZE, TILESIZE))
 
         self.rect = self.image.get_rect()
         self.rect.x = self.x
@@ -400,31 +418,30 @@ class Cacador(pygame.sprite.Sprite):
         self.speed = 2
         self.cooldown_tiro = 0
 
-        self.hp = 27 #o caçador tem 15 de vida
-        self.invencivel_timer = 0 
+        self.hp = 27  # o caçador tem 15 de vida
+        self.invencivel_timer = 0
 
-        self.tempo_espera = 120 #2 segundos de espera antes de começar a perseguir o jogador
+        self.tempo_espera = 120  # 2 segundos de espera antes de começar a perseguir o jogador
         self.ativo = False
 
     def take_damage(self, damage):
         if self.invencivel_timer == 0:
             self.hp -= damage
-            self.invencivel_timer = 15 #fica invencivel por alguns frames
+            self.invencivel_timer = 15  # fica invencivel por alguns frames
 
             if self.hp <= 0:
                 self.game.motivo_game_over = "vitoria"
                 self.game.playing = False
-                self.kill()  #Morre se a vida chegar a zero
-
+                self.kill()  # Morre se a vida chegar a zero
 
     def update(self):
-        if self.invencivel_timer > 0: #diminui o timer de invencinilidade se tomou dano há pouco
+        if self.invencivel_timer > 0:  # diminui o timer de invencinilidade se tomou dano há pouco
             self.invencivel_timer -= 1
 
         player = self.game.player
         if player is None:
             return
-        
+
         # Verifica se o caçador está ativo
         if not self.ativo:
             if self.tempo_espera > 0:
@@ -444,7 +461,6 @@ class Cacador(pygame.sprite.Sprite):
 
         x_distancia = 0
         y_distancia = 0
-
 
         if distancia > distancia_minima:
             if self.rect.centerx < player.rect.centerx:
@@ -498,14 +514,16 @@ class Cacador(pygame.sprite.Sprite):
                             dy_tiro
                         )
                     elif sorteado == Poder_curupira:
-                        Poder_curupira(self.game, self.rect.centerx, self.rect.centery)
+                        Poder_curupira(
+                            self.game, self.rect.centerx, self.rect.centery)
                     else:
                         Poder(self.game, self.rect.centerx, self.rect.centery)
 
                     self.cooldown_tiro = 60  # espera um tempo de +- 1 segundo
 
     def collide_walls(self, direcao, distancia):
-        bateu_parede = pygame.sprite.spritecollide(self, self.game.walls, False)
+        bateu_parede = pygame.sprite.spritecollide(
+            self, self.game.walls, False)
         if bateu_parede:
             if direcao == 'x':
                 if distancia > 0:  # movendo para a direita
