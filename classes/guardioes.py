@@ -59,8 +59,10 @@ class MulaSemCabeca(pygame.sprite.Sprite):  # classe para a mula sem cabeça
         self.x = x * TILESIZE
         self.y = y * TILESIZE
 
-        sprite = pygame.image.load(os.path.join(
-            "assetes", "sprites", "mula-sem-cabeca.png")).convert_alpha()
+        diretorio_atual = os.path.dirname(__file__)
+        caminho = os.path.join(diretorio_atual,"..","assetes","sprites","mula-sem-cabeca.png")
+        sprite = pygame.image.load(caminho).convert_alpha()
+
         self.image = pygame.transform.scale(sprite, (TILESIZE, TILESIZE))
 
         self.rect = self.image.get_rect()
@@ -283,8 +285,10 @@ class Iara(pygame.sprite.Sprite):
 
         pygame.sprite.Sprite.__init__(self, self.group)
 
-        sprite = pygame.image.load(os.path.join(
-            "assetes", "sprites", "Iara.png")).convert_alpha()
+        diretorio_atual = os.path.dirname(__file__)
+        caminho = os.path.join(diretorio_atual,"..","assetes","sprites","iara.png")
+        sprite = pygame.image.load(caminho).convert_alpha()
+
         self.image = pygame.transform.scale(sprite, (TILESIZE, TILESIZE))
 
         self.rect = self.image.get_rect()
@@ -324,8 +328,10 @@ class Curupira(pygame.sprite.Sprite):
 
         pygame.sprite.Sprite.__init__(self, self.group)
 
-        sprite = pygame.image.load(os.path.join(
-            "assetes", "sprites", "curupira.png")).convert_alpha()
+        diretorio_atual = os.path.dirname(__file__)
+        caminho = os.path.join(diretorio_atual,"..","assetes","sprites","curupira.png")
+        sprite = pygame.image.load(caminho).convert_alpha()
+
         self.image = pygame.transform.scale(sprite, (TILESIZE, TILESIZE))
 
         self.rect = self.image.get_rect()
@@ -406,8 +412,9 @@ class Cacador(pygame.sprite.Sprite):
         self.x = x * TILESIZE
         self.y = y * TILESIZE
 
-        sprite = pygame.image.load(os.path.join(
-            "assetes", "sprites", "cacador.png")).convert_alpha()
+        diretorio_atual = os.path.dirname(__file__)
+        caminho = os.path.join(diretorio_atual,"..","assetes","sprites","caçador.png")
+        sprite = pygame.image.load(caminho).convert_alpha()
         self.image = pygame.transform.scale(sprite, (TILESIZE, TILESIZE))
 
         self.rect = self.image.get_rect()
